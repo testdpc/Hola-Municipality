@@ -92,7 +92,7 @@ export default function Login() {
                   <FormItem>
                     <FormLabel className="font-semibold">Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} className="h-12" />
+                      <Input type="password" placeholder="Enter your password" {...field} className="h-12" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
