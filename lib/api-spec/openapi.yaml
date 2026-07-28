@@ -3,20 +3,50 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Hola Municipality Inventory Management System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User management
+  - name: dashboard
+    description: Dashboard statistics
+  - name: categories
+    description: Item categories
+  - name: suppliers
+    description: Supplier management
+  - name: inventory
+    description: Inventory items
+  - name: purchase-orders
+    description: Local Purchase Orders (LPO)
+  - name: grn
+    description: Goods Received Notes
+  - name: stock-issues
+    description: Stock issue to departments
+  - name: stock-returns
+    description: Stock returns
+  - name: stock-adjustments
+    description: Stock adjustments
+  - name: stock-taking
+    description: Stock taking / count
+  - name: notifications
+    description: System notifications
+  - name: audit
+    description: Audit trail
+  - name: reports
+    description: Reports and exports
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +54,1152 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # AUTH
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # USERS
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Deactivate user (soft delete)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Deactivated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # DASHBOARD
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/recent-transactions:
+    get:
+      operationId: getRecentTransactions
+      tags: [dashboard]
+      summary: Get recent transactions
+      responses:
+        "200":
+          description: Recent transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecentTransaction"
+
+  /dashboard/stock-movement-chart:
+    get:
+      operationId: getStockMovementChart
+      tags: [dashboard]
+      summary: Stock movement chart data (last 6 months)
+      responses:
+        "200":
+          description: Chart data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockMovementChartPoint"
+
+  # CATEGORIES
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List categories
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}:
+    get:
+      operationId: getCategory
+      tags: [categories]
+      summary: Get category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    patch:
+      operationId: updateCategory
+      tags: [categories]
+      summary: Update category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: deleteCategory
+      tags: [categories]
+      summary: Delete category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # SUPPLIERS
+  /suppliers:
+    get:
+      operationId: listSuppliers
+      tags: [suppliers]
+      summary: List suppliers
+      responses:
+        "200":
+          description: Suppliers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Supplier"
+    post:
+      operationId: createSupplier
+      tags: [suppliers]
+      summary: Create supplier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupplierInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+
+  /suppliers/{id}:
+    get:
+      operationId: getSupplier
+      tags: [suppliers]
+      summary: Get supplier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Supplier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+    patch:
+      operationId: updateSupplier
+      tags: [suppliers]
+      summary: Update supplier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupplierUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+    delete:
+      operationId: deleteSupplier
+      tags: [suppliers]
+      summary: Delete supplier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # INVENTORY ITEMS
+  /inventory:
+    get:
+      operationId: listInventoryItems
+      tags: [inventory]
+      summary: List inventory items
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: ["number", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+    post:
+      operationId: createInventoryItem
+      tags: [inventory]
+      summary: Create inventory item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InventoryItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItem"
+
+  /inventory/low-stock:
+    get:
+      operationId: getLowStockItems
+      tags: [inventory]
+      summary: Get low-stock and out-of-stock items
+      responses:
+        "200":
+          description: Low stock items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+
+  /inventory/expiring:
+    get:
+      operationId: getExpiringItems
+      tags: [inventory]
+      summary: Get items expiring within 30 days
+      responses:
+        "200":
+          description: Expiring items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+
+  /inventory/{id}:
+    get:
+      operationId: getInventoryItem
+      tags: [inventory]
+      summary: Get inventory item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItem"
+    patch:
+      operationId: updateInventoryItem
+      tags: [inventory]
+      summary: Update inventory item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InventoryItemUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItem"
+    delete:
+      operationId: deleteInventoryItem
+      tags: [inventory]
+      summary: Soft-delete inventory item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # PURCHASE ORDERS (LPO)
+  /purchase-orders:
+    get:
+      operationId: listPurchaseOrders
+      tags: [purchase-orders]
+      summary: List purchase orders
+      responses:
+        "200":
+          description: Purchase orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PurchaseOrder"
+    post:
+      operationId: createPurchaseOrder
+      tags: [purchase-orders]
+      summary: Create purchase order (LPO)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseOrderInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+
+  /purchase-orders/{id}:
+    get:
+      operationId: getPurchaseOrder
+      tags: [purchase-orders]
+      summary: Get purchase order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Purchase order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+    patch:
+      operationId: updatePurchaseOrder
+      tags: [purchase-orders]
+      summary: Update purchase order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseOrderUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+
+  /purchase-orders/{id}/approve:
+    post:
+      operationId: approvePurchaseOrder
+      tags: [purchase-orders]
+      summary: Approve purchase order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+
+  /purchase-orders/{id}/reject:
+    post:
+      operationId: rejectPurchaseOrder
+      tags: [purchase-orders]
+      summary: Reject purchase order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectInput"
+      responses:
+        "200":
+          description: Rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+
+  # GOODS RECEIVED NOTES
+  /grn:
+    get:
+      operationId: listGRNs
+      tags: [grn]
+      summary: List goods received notes
+      responses:
+        "200":
+          description: GRNs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GoodsReceivedNote"
+    post:
+      operationId: createGRN
+      tags: [grn]
+      summary: Create goods received note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GRNInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoodsReceivedNote"
+
+  /grn/{id}:
+    get:
+      operationId: getGRN
+      tags: [grn]
+      summary: Get GRN
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: GRN
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoodsReceivedNote"
+    patch:
+      operationId: updateGRN
+      tags: [grn]
+      summary: Update GRN
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GRNUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoodsReceivedNote"
+
+  # STOCK ISSUES
+  /stock-issues:
+    get:
+      operationId: listStockIssues
+      tags: [stock-issues]
+      summary: List stock issues
+      responses:
+        "200":
+          description: Stock issues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockIssue"
+    post:
+      operationId: createStockIssue
+      tags: [stock-issues]
+      summary: Create stock issue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockIssueInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockIssue"
+
+  /stock-issues/{id}:
+    get:
+      operationId: getStockIssue
+      tags: [stock-issues]
+      summary: Get stock issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Stock issue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockIssue"
+
+  /stock-issues/{id}/approve:
+    post:
+      operationId: approveStockIssue
+      tags: [stock-issues]
+      summary: Approve stock issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Approved and stock deducted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockIssue"
+
+  # STOCK RETURNS
+  /stock-returns:
+    get:
+      operationId: listStockReturns
+      tags: [stock-returns]
+      summary: List stock returns
+      responses:
+        "200":
+          description: Stock returns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockReturn"
+    post:
+      operationId: createStockReturn
+      tags: [stock-returns]
+      summary: Create stock return
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockReturnInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockReturn"
+
+  /stock-returns/{id}:
+    get:
+      operationId: getStockReturn
+      tags: [stock-returns]
+      summary: Get stock return
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Stock return
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockReturn"
+
+  # STOCK ADJUSTMENTS
+  /stock-adjustments:
+    get:
+      operationId: listStockAdjustments
+      tags: [stock-adjustments]
+      summary: List stock adjustments
+      responses:
+        "200":
+          description: Adjustments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockAdjustment"
+    post:
+      operationId: createStockAdjustment
+      tags: [stock-adjustments]
+      summary: Create stock adjustment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockAdjustmentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockAdjustment"
+
+  /stock-adjustments/{id}:
+    get:
+      operationId: getStockAdjustment
+      tags: [stock-adjustments]
+      summary: Get stock adjustment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Adjustment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockAdjustment"
+
+  # STOCK TAKING
+  /stock-takings:
+    get:
+      operationId: listStockTakings
+      tags: [stock-taking]
+      summary: List stock taking sessions
+      responses:
+        "200":
+          description: Sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockTaking"
+    post:
+      operationId: createStockTaking
+      tags: [stock-taking]
+      summary: Create stock taking session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockTakingInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTaking"
+
+  /stock-takings/{id}:
+    get:
+      operationId: getStockTaking
+      tags: [stock-taking]
+      summary: Get stock taking session with items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTaking"
+    patch:
+      operationId: updateStockTaking
+      tags: [stock-taking]
+      summary: Update stock taking (finalize)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockTakingUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTaking"
+
+  # NOTIFICATIONS
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: Get notifications for current user
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200":
+          description: All marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # AUDIT TRAIL
+  /audit:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: List audit log entries
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: ["number", "null"]
+        - name: action
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: from
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: to
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
+
+  # REPORTS
+  /reports/current-stock:
+    get:
+      operationId: getReportCurrentStock
+      tags: [reports]
+      summary: Current stock report
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+
+  /reports/low-stock:
+    get:
+      operationId: getReportLowStock
+      tags: [reports]
+      summary: Low stock report
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+
+  /reports/department-consumption:
+    get:
+      operationId: getReportDepartmentConsumption
+      tags: [reports]
+      summary: Department consumption report
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: to
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DepartmentConsumptionRow"
+
+  /reports/stock-movement:
+    get:
+      operationId: getReportStockMovement
+      tags: [reports]
+      summary: Monthly stock movement report
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: to
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockMovementRow"
+
+  /reports/inventory-valuation:
+    get:
+      operationId: getReportInventoryValuation
+      tags: [reports]
+      summary: Inventory valuation report
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryValuationReport"
+
+  /reports/supplier:
+    get:
+      operationId: getReportSupplier
+      tags: [reports]
+      summary: Supplier performance report
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SupplierReportRow"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +1210,901 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    # AUTH
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    # USER
+    User:
+      type: object
+      required: [id, username, fullName, email, role, isActive, createdAt]
+      properties:
+        id:
+          type: number
+        username:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [administrator, storekeeper, procurement_officer, finance_officer, department_user, auditor]
+        department:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+
+    UserInput:
+      type: object
+      required: [username, fullName, email, role, password]
+      properties:
+        username:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [administrator, storekeeper, procurement_officer, finance_officer, department_user, auditor]
+        department:
+          type: string
+        phone:
+          type: string
+        password:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [administrator, storekeeper, procurement_officer, finance_officer, department_user, auditor]
+        department:
+          type: string
+        phone:
+          type: string
+        isActive:
+          type: boolean
+        password:
+          type: string
+
+    # DASHBOARD
+    DashboardStats:
+      type: object
+      required: [totalItems, totalValue, lowStockCount, outOfStockCount, pendingRequisitions, itemsReceivedToday, itemsIssuedToday]
+      properties:
+        totalItems:
+          type: number
+        totalValue:
+          type: number
+        lowStockCount:
+          type: number
+        outOfStockCount:
+          type: number
+        pendingRequisitions:
+          type: number
+        itemsReceivedToday:
+          type: number
+        itemsIssuedToday:
+          type: number
+
+    RecentTransaction:
+      type: object
+      required: [id, type, description, quantity, user, timestamp]
+      properties:
+        id:
+          type: number
+        type:
+          type: string
+          enum: [received, issued, returned, adjusted]
+        description:
+          type: string
+        quantity:
+          type: number
+        user:
+          type: string
+        timestamp:
+          type: string
+
+    StockMovementChartPoint:
+      type: object
+      required: [month, received, issued]
+      properties:
+        month:
+          type: string
+        received:
+          type: number
+        issued:
+          type: number
+
+    # CATEGORY
+    Category:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    CategoryInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    # SUPPLIER
+    Supplier:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        contactPerson:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        kraPin:
+          type: ["string", "null"]
+        physicalAddress:
+          type: ["string", "null"]
+        performanceRating:
+          type: ["number", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+
+    SupplierInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        contactPerson:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        kraPin:
+          type: string
+        physicalAddress:
+          type: string
+        performanceRating:
+          type: number
+
+    SupplierUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        contactPerson:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        kraPin:
+          type: string
+        physicalAddress:
+          type: string
+        performanceRating:
+          type: number
+        isActive:
+          type: boolean
+
+    # INVENTORY ITEM
+    InventoryItem:
+      type: object
+      required: [id, itemCode, itemName, categoryId, unitOfMeasure, currentQuantity, minimumStock, maximumStock, reorderLevel, purchasePrice, status, createdAt]
+      properties:
+        id:
+          type: number
+        itemCode:
+          type: string
+        barcodeQr:
+          type: ["string", "null"]
+        itemName:
+          type: string
+        categoryId:
+          type: number
+        categoryName:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        unitOfMeasure:
+          type: string
+        currentQuantity:
+          type: number
+        minimumStock:
+          type: number
+        maximumStock:
+          type: number
+        reorderLevel:
+          type: number
+        shelfBinLocation:
+          type: ["string", "null"]
+        purchasePrice:
+          type: number
+        supplierId:
+          type: ["number", "null"]
+        supplierName:
+          type: ["string", "null"]
+        dateReceived:
+          type: ["string", "null"]
+        expiryDate:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [available, low_stock, out_of_stock]
+        createdAt:
+          type: string
+
+    InventoryItemInput:
+      type: object
+      required: [itemCode, itemName, categoryId, unitOfMeasure, currentQuantity, minimumStock, maximumStock, reorderLevel, purchasePrice]
+      properties:
+        itemCode:
+          type: string
+        barcodeQr:
+          type: string
+        itemName:
+          type: string
+        categoryId:
+          type: number
+        description:
+          type: string
+        unitOfMeasure:
+          type: string
+        currentQuantity:
+          type: number
+        minimumStock:
+          type: number
+        maximumStock:
+          type: number
+        reorderLevel:
+          type: number
+        shelfBinLocation:
+          type: string
+        purchasePrice:
+          type: number
+        supplierId:
+          type: number
+        dateReceived:
+          type: string
+        expiryDate:
+          type: string
+
+    InventoryItemUpdate:
+      type: object
+      properties:
+        itemCode:
+          type: string
+        barcodeQr:
+          type: string
+        itemName:
+          type: string
+        categoryId:
+          type: number
+        description:
+          type: string
+        unitOfMeasure:
+          type: string
+        currentQuantity:
+          type: number
+        minimumStock:
+          type: number
+        maximumStock:
+          type: number
+        reorderLevel:
+          type: number
+        shelfBinLocation:
+          type: string
+        purchasePrice:
+          type: number
+        supplierId:
+          type: number
+        dateReceived:
+          type: string
+        expiryDate:
+          type: string
+
+    # PURCHASE ORDER
+    PurchaseOrderItem:
+      type: object
+      required: [inventoryItemId, itemName, quantity, unitPrice, totalPrice]
+      properties:
+        id:
+          type: number
+        inventoryItemId:
+          type: number
+        itemName:
+          type: string
+        quantity:
+          type: number
+        unitPrice:
+          type: number
+        totalPrice:
+          type: number
+
+    PurchaseOrder:
+      type: object
+      required: [id, lpoNumber, supplierId, department, status, totalAmount, createdAt]
+      properties:
+        id:
+          type: number
+        lpoNumber:
+          type: string
+        supplierId:
+          type: number
+        supplierName:
+          type: ["string", "null"]
+        department:
+          type: string
+        requestedById:
+          type: ["number", "null"]
+        requestedByName:
+          type: ["string", "null"]
+        approvedById:
+          type: ["number", "null"]
+        approvedByName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [draft, pending_approval, approved, rejected, received]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PurchaseOrderItem"
+        totalAmount:
+          type: number
+        notes:
+          type: ["string", "null"]
+        rejectionReason:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    PurchaseOrderInput:
+      type: object
+      required: [supplierId, department, items]
+      properties:
+        supplierId:
+          type: number
+        department:
+          type: string
+        notes:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PurchaseOrderItem"
+
+    PurchaseOrderUpdate:
+      type: object
+      properties:
+        supplierId:
+          type: number
+        department:
+          type: string
+        notes:
+          type: string
+        status:
+          type: string
+          enum: [draft, pending_approval, approved, rejected, received]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PurchaseOrderItem"
+
+    RejectInput:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+
+    # GRN
+    GRNItem:
+      type: object
+      required: [inventoryItemId, itemName, quantityOrdered, quantityReceived, unitPrice]
+      properties:
+        id:
+          type: number
+        inventoryItemId:
+          type: number
+        itemName:
+          type: string
+        quantityOrdered:
+          type: number
+        quantityReceived:
+          type: number
+        unitPrice:
+          type: number
+
+    GoodsReceivedNote:
+      type: object
+      required: [id, grnNumber, supplierId, dateReceived, receivingOfficerId, inspectionStatus, status, createdAt]
+      properties:
+        id:
+          type: number
+        grnNumber:
+          type: string
+        purchaseOrderId:
+          type: ["number", "null"]
+        lpoNumber:
+          type: ["string", "null"]
+        supplierId:
+          type: number
+        supplierName:
+          type: ["string", "null"]
+        deliveryNoteNumber:
+          type: ["string", "null"]
+        dateReceived:
+          type: string
+        receivingOfficerId:
+          type: number
+        receivingOfficerName:
+          type: ["string", "null"]
+        inspectionStatus:
+          type: string
+          enum: [pending, passed, failed, partial]
+        status:
+          type: string
+          enum: [draft, posted]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/GRNItem"
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    GRNInput:
+      type: object
+      required: [supplierId, dateReceived, receivingOfficerId, items]
+      properties:
+        supplierId:
+          type: number
+        purchaseOrderId:
+          type: number
+        deliveryNoteNumber:
+          type: string
+        dateReceived:
+          type: string
+        receivingOfficerId:
+          type: number
+        inspectionStatus:
+          type: string
+          enum: [pending, passed, failed, partial]
+        notes:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/GRNItem"
+
+    GRNUpdate:
+      type: object
+      properties:
+        deliveryNoteNumber:
+          type: string
+        inspectionStatus:
+          type: string
+          enum: [pending, passed, failed, partial]
+        status:
+          type: string
+          enum: [draft, posted]
+        notes:
+          type: string
+
+    # STOCK ISSUE
+    StockIssueItem:
+      type: object
+      required: [inventoryItemId, itemName, quantity]
+      properties:
+        id:
+          type: number
+        inventoryItemId:
+          type: number
+        itemName:
+          type: string
+        quantity:
+          type: number
+
+    StockIssue:
+      type: object
+      required: [id, requestNumber, department, requestedById, status, issueDate, createdAt]
+      properties:
+        id:
+          type: number
+        requestNumber:
+          type: string
+        department:
+          type: string
+        requestedById:
+          type: number
+        requestedByName:
+          type: ["string", "null"]
+        approvedById:
+          type: ["number", "null"]
+        approvedByName:
+          type: ["string", "null"]
+        issuedById:
+          type: ["number", "null"]
+        issuedByName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, approved, issued, rejected]
+        issueDate:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StockIssueItem"
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    StockIssueInput:
+      type: object
+      required: [department, requestedById, issueDate, items]
+      properties:
+        department:
+          type: string
+        requestedById:
+          type: number
+        issueDate:
+          type: string
+        notes:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StockIssueItem"
+
+    # STOCK RETURN
+    StockReturn:
+      type: object
+      required: [id, returnNumber, inventoryItemId, quantity, condition, reason, storekeeperI, returnDate, createdAt]
+      properties:
+        id:
+          type: number
+        returnNumber:
+          type: string
+        inventoryItemId:
+          type: number
+        itemName:
+          type: ["string", "null"]
+        quantity:
+          type: number
+        condition:
+          type: string
+          enum: [good, damaged, expired]
+        reason:
+          type: string
+        storekeeperI:
+          type: number
+        storekeeperName:
+          type: ["string", "null"]
+        returnDate:
+          type: string
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    StockReturnInput:
+      type: object
+      required: [inventoryItemId, quantity, condition, reason, storekeeperI, returnDate]
+      properties:
+        inventoryItemId:
+          type: number
+        quantity:
+          type: number
+        condition:
+          type: string
+          enum: [good, damaged, expired]
+        reason:
+          type: string
+        storekeeperI:
+          type: number
+        returnDate:
+          type: string
+        notes:
+          type: string
+
+    # STOCK ADJUSTMENT
+    StockAdjustment:
+      type: object
+      required: [id, adjustmentNumber, inventoryItemId, adjustmentType, quantityBefore, quantityAfter, reason, adjustedById, adjustmentDate, createdAt]
+      properties:
+        id:
+          type: number
+        adjustmentNumber:
+          type: string
+        inventoryItemId:
+          type: number
+        itemName:
+          type: ["string", "null"]
+        adjustmentType:
+          type: string
+          enum: [lost, damaged, expired, count_correction, other]
+        quantityBefore:
+          type: number
+        quantityAfter:
+          type: number
+        reason:
+          type: string
+        adjustedById:
+          type: number
+        adjustedByName:
+          type: ["string", "null"]
+        adjustmentDate:
+          type: string
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    StockAdjustmentInput:
+      type: object
+      required: [inventoryItemId, adjustmentType, quantityAfter, reason, adjustedById, adjustmentDate]
+      properties:
+        inventoryItemId:
+          type: number
+        adjustmentType:
+          type: string
+          enum: [lost, damaged, expired, count_correction, other]
+        quantityAfter:
+          type: number
+        reason:
+          type: string
+        adjustedById:
+          type: number
+        adjustmentDate:
+          type: string
+        notes:
+          type: string
+
+    # STOCK TAKING
+    StockTakingItem:
+      type: object
+      required: [inventoryItemId, itemName, systemQuantity, physicalQuantity, variance]
+      properties:
+        id:
+          type: number
+        inventoryItemId:
+          type: number
+        itemName:
+          type: string
+        systemQuantity:
+          type: number
+        physicalQuantity:
+          type: number
+        variance:
+          type: number
+        notes:
+          type: ["string", "null"]
+
+    StockTaking:
+      type: object
+      required: [id, sessionNumber, conductedById, status, startDate, createdAt]
+      properties:
+        id:
+          type: number
+        sessionNumber:
+          type: string
+        conductedById:
+          type: number
+        conductedByName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [in_progress, completed, cancelled]
+        startDate:
+          type: string
+        endDate:
+          type: ["string", "null"]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StockTakingItem"
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    StockTakingInput:
+      type: object
+      required: [conductedById, startDate]
+      properties:
+        conductedById:
+          type: number
+        startDate:
+          type: string
+        notes:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StockTakingItem"
+
+    StockTakingUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [in_progress, completed, cancelled]
+        endDate:
+          type: string
+        notes:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StockTakingItem"
+
+    # NOTIFICATIONS
+    Notification:
+      type: object
+      required: [id, type, title, message, isRead, createdAt]
+      properties:
+        id:
+          type: number
+        type:
+          type: string
+          enum: [low_stock, out_of_stock, expiring_item, pending_approval]
+        title:
+          type: string
+        message:
+          type: string
+        isRead:
+          type: boolean
+        relatedId:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+
+    # AUDIT
+    AuditLog:
+      type: object
+      required: [id, userId, userName, action, tableName, createdAt]
+      properties:
+        id:
+          type: number
+        userId:
+          type: number
+        userName:
+          type: string
+        action:
+          type: string
+        tableName:
+          type: string
+        recordId:
+          type: ["number", "null"]
+        oldValues:
+          type: ["string", "null"]
+        newValues:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    # REPORTS
+    DepartmentConsumptionRow:
+      type: object
+      required: [department, totalIssues, totalItems]
+      properties:
+        department:
+          type: string
+        totalIssues:
+          type: number
+        totalItems:
+          type: number
+
+    StockMovementRow:
+      type: object
+      required: [month, received, issued, adjusted]
+      properties:
+        month:
+          type: string
+        received:
+          type: number
+        issued:
+          type: number
+        adjusted:
+          type: number
+
+    InventoryValuationReport:
+      type: object
+      required: [totalValue, items]
+      properties:
+        totalValue:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryItem"
+
+    SupplierReportRow:
+      type: object
+      required: [supplierId, supplierName, totalOrders, totalValue, performanceRating]
+      properties:
+        supplierId:
+          type: number
+        supplierName:
+          type: string
+        totalOrders:
+          type: number
+        totalValue:
+          type: number
+        performanceRating:
+          type: ["number", "null"]

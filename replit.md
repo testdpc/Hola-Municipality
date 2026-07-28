@@ -1,45 +1,83 @@
-# [Project name]
+# HMIMS — Hola Municipality Inventory Management System
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A full-stack inventory management system for the Municipality of Hola, Tana River County, Kenya. Covers procurement, stock movements, reporting, audit trail, and role-based access for 6 user roles.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/hmims run dev` — frontend (port assigned by workflow)
+- `pnpm --filter @workspace/api-server run dev` — API server (port assigned by workflow)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `DATABASE_URL` — Postgres connection string (pre-configured), `SESSION_SECRET` — JWT secret
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- **Frontend**: React 19 + Vite + Tailwind CSS v4 + shadcn/ui + Wouter routing + Recharts
+- **Backend**: Express 5 + Drizzle ORM + PostgreSQL
+- **Auth**: JWT (jsonwebtoken + bcryptjs), stored in localStorage as `hmims_token`
+- **Validation**: Zod (`zod/v4`), `drizzle-zod`
+- **API codegen**: Orval (from OpenAPI spec → React Query hooks + Zod schemas)
+- **Build**: esbuild (API server CJS bundle)
 
-## Where things live
+## Default Login Credentials
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+| Username | Password | Role |
+|---|---|---|
+| admin | Admin@1234 | Administrator |
+| storekeeper | Admin@1234 | Storekeeper |
+| procurement | Admin@1234 | Procurement Officer |
+| finance | Admin@1234 | Finance Officer |
+| dept_user | Admin@1234 | Department User |
+| auditor | Admin@1234 | Auditor |
 
-## Architecture decisions
+## Where Things Live
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- `lib/api-spec/openapi.yaml` — single source of truth for all API contracts
+- `lib/db/src/schema/` — Drizzle ORM schema (users, categories, suppliers, inventory, purchase orders, GRN, stock movements, notifications, audit)
+- `lib/api-client-react/src/generated/` — generated React Query hooks (do not hand-edit)
+- `lib/api-zod/src/generated/` — generated Zod schemas (do not hand-edit)
+- `artifacts/api-server/src/routes/` — Express route handlers (16 route groups)
+- `artifacts/api-server/src/lib/` — auth.ts (JWT), audit.ts (audit log helper)
+- `artifacts/hmims/src/pages/` — all frontend pages
+- `artifacts/hmims/src/components/layout.tsx` — sidebar + app shell
 
-## Product
+## Modules
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+| Module | Status | Route |
+|---|---|---|
+| Dashboard | ✅ | `/dashboard` |
+| Inventory Items | ✅ | `/inventory` |
+| Categories | ✅ | `/categories` |
+| Suppliers | ✅ | `/suppliers` |
+| Purchase Orders (LPO) | ✅ | `/purchase-orders` |
+| Goods Received Notes | ✅ | `/grn` |
+| Stock Issues | ✅ | `/stock-issues` |
+| Stock Returns | ✅ | `/stock-returns` |
+| Stock Adjustments | ✅ | `/stock-adjustments` |
+| Stock Taking | ✅ | `/stock-taking` |
+| Reports | ✅ | `/reports` |
+| Notifications | ✅ | `/notifications` |
+| User Management | ✅ | `/users` |
+| Audit Trail | ✅ | `/audit` |
 
-## User preferences
+## Architecture Decisions
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- JWT in localStorage (not cookies) to keep the API stateless and work cleanly with the Replit proxy setup
+- Soft-deletes on inventory items (`is_deleted` flag) — nothing is permanently deleted
+- All audit logs written in route handlers via `createAuditLog()` helper — failures are silently swallowed so they never break the main operation
+- OpenAPI-first: all types come from codegen; hand-writing types against the spec is forbidden
+- `SESSION_SECRET` env var used as JWT signing key (falls back to hardcoded dev string if not set)
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- After any OpenAPI spec change, run codegen before touching frontend or backend: `pnpm --filter @workspace/api-spec run codegen`
+- The `storekeeperI` field name in `stockReturnsTable` is a typo from the original schema — it maps to DB column `storekeeper_id`. Do not rename it without a DB migration.
+- DB schema was pushed via raw SQL (not drizzle push) — if you add new columns, write a SQL ALTER TABLE or re-run the full schema
 
-## Pointers
+## User Preferences
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- Project is for Hola Municipality, Tana River County, Kenya
+- Government of Kenya context — professional, formal UI tone
+- All amounts in Kenyan Shillings (KES)
