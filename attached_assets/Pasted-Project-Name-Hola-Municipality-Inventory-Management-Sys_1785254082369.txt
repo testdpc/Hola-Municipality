@@ -1,0 +1,161 @@
+Project Name
+Hola Municipality Inventory Management System (HMIMS)
+Login
+Username
+Password
+Role-based access
+Administrator
+Storekeeper
+Procurement Officer
+Finance Officer
+Department User
+Auditor
+Dashboard
+When users log in, they should immediately see:
+Total inventory items
+Current inventory value
+Low-stock items
+Out-of-stock items
+Pending requisitions
+Items received today
+Items issued today
+Recent transactions
+Charts showing stock movement
+Inventory Module
+Each inventory item should include:
+Item Code
+Barcode/QR Code
+Item Name
+Category
+Description
+Unit of Measure
+Current Quantity
+Minimum Stock
+Maximum Stock
+Reorder Level
+Shelf/Bin Location
+Purchase Price
+Supplier
+Date Received
+Expiry Date (if applicable)
+Status (Available, Low Stock, Out of Stock)
+Categories
+Examples:
+Office Supplies
+ICT Equipment
+Furniture
+Fuel
+Building Materials
+Cleaning Materials
+Medical Supplies
+Electrical Items
+Stationery
+Motor Vehicle Parts
+Suppliers
+Store:
+Supplier Name
+Contact Person
+Phone
+Email
+KRA PIN
+Physical Address
+Performance Rating
+Purchase Orders (LPO)
+Track:
+LPO Number
+Supplier
+Department
+Ordered Items
+Quantity
+Price
+Approval Status
+Goods Received Note (GRN)
+Capture:
+GRN Number
+Delivery Note
+Supplier
+Date Received
+Quantity Received
+Receiving Officer
+Inspection Status
+Stock Issue
+When departments request items:
+Request Number
+Department
+Requested By
+Approved By
+Item
+Quantity
+Issue Date
+The system should automatically reduce stock.
+Stock Return
+Track returned items:
+Item
+Quantity
+Condition
+Reason
+Storekeeper
+Stock Adjustment
+For:
+Lost items
+Damaged items
+Expired stock
+Counting corrections
+Every adjustment should require a reason.
+Stock Taking
+Generate stock count sheets.
+Compare:
+System Quantity
+Physical Quantity
+Difference
+Generate variance reports.
+Reports
+Include:
+Current Stock Report
+Low Stock Report
+Fast Moving Items
+Slow Moving Items
+Department Consumption
+Supplier Report
+Inventory Valuation
+Expired Items
+Damaged Items
+Monthly Stock Movement
+Audit Report
+Allow reports to be exported as PDF and Excel.
+Notifications
+Low stock alerts
+Out-of-stock alerts
+Expiring items
+Pending approvals
+Audit Trail
+Record every action:
+User
+Date
+Time
+IP address (optional)
+Action performed
+Nothing should be deleted permanently.
+Technology Stack
+Since you're using Replit, I recommend:
+Frontend: React + Tailwind CSS
+Backend: Node.js + Express
+Database: PostgreSQL
+Authentication: JWT
+ORM: Prisma
+Charts: Chart.js
+PDF Reports: PDFKit
+Excel Export: ExcelJS
+Future Enhancements
+Once the core system is working, you can add:
+QR code/barcode scanning
+Multi-store support
+Asset management
+Vehicle fuel management
+Purchase requisition workflow
+Integration with IFMIS (where applicable)
+Mobile-friendly interface
+AI-powered demand forecasting
+Email notifications
+Digital signatures for approvals
+This design would give the Municipality of Hola a professional inventory system comparable to those used in many government organisations, while still being practical to build incrementally in Replit. Start with the core modules (login, inventory, suppliers, GRN, stock issue, and reports), then expand with advanced features after the foundation is stable.
