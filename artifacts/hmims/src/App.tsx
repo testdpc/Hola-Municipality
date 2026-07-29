@@ -4,6 +4,10 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter, Redirect } from 'wouter';
 import { AppLayout } from '@/components/layout';
+import { setAuthTokenGetter } from '@workspace/api-client-react';
+
+// Attach the JWT from localStorage to every API request
+setAuthTokenGetter(() => localStorage.getItem('hmims_token'));
 
 import Login from '@/pages/login';
 import Dashboard from '@/pages/dashboard';
