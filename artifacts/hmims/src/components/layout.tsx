@@ -100,16 +100,28 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <Sidebar variant="sidebar" collapsible="icon">
-        <SidebarHeader className="border-b border-sidebar-border h-16 flex items-center px-4">
-          <div className="flex items-center gap-2 overflow-hidden">
+        <SidebarHeader className="border-b border-sidebar-border">
+          {/* Expanded header — visible when sidebar is open */}
+          <div className="group-data-[collapsible=icon]:hidden flex flex-col items-center gap-1 px-4 py-5">
+            <img
+              src="/tana-river-logo.jpeg"
+              alt="County Government of Tana River"
+              className="w-20 h-20 object-contain drop-shadow-sm"
+            />
+            <span className="font-extrabold text-base text-sidebar-foreground tracking-wide mt-1">
+              HMIMS
+            </span>
+            <span className="text-[10px] text-sidebar-foreground/60 text-center leading-tight px-2">
+              Hola Municipality · Tana River County
+            </span>
+          </div>
+          {/* Collapsed icon — visible only when sidebar is icon-only */}
+          <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center h-14">
             <img
               src="/tana-river-logo.jpeg"
               alt="Tana River County"
-              className="w-8 h-8 object-contain shrink-0"
+              className="w-8 h-8 object-contain"
             />
-            <span className="font-bold text-lg whitespace-nowrap text-sidebar-foreground truncate">
-              HMIMS
-            </span>
           </div>
         </SidebarHeader>
         <SidebarContent>
