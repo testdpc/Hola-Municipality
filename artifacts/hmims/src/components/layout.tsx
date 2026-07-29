@@ -102,9 +102,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <Sidebar variant="sidebar" collapsible="icon">
         <SidebarHeader className="border-b border-sidebar-border h-16 flex items-center px-4">
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-8 h-8 rounded-md bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold shrink-0">
-              HM
-            </div>
+            <img
+              src="/tana-river-logo.jpeg"
+              alt="Tana River County"
+              className="w-8 h-8 object-contain shrink-0"
+            />
             <span className="font-bold text-lg whitespace-nowrap text-sidebar-foreground truncate">
               HMIMS
             </span>

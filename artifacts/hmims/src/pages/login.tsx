@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const loginSchema = z.object({
@@ -61,9 +60,11 @@ export default function Login() {
       
       <Card className="w-full max-w-md z-10 shadow-2xl border-none">
         <CardHeader className="space-y-2 text-center pt-8">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-xl flex items-center justify-center mb-4 shadow-inner">
-            <Shield className="w-8 h-8 text-primary-foreground" />
-          </div>
+          <img
+            src="/tana-river-logo.jpeg"
+            alt="County Government of Tana River"
+            className="mx-auto w-28 h-28 object-contain mb-2 drop-shadow-md"
+          />
           <CardTitle className="text-3xl font-bold tracking-tight">HMIMS</CardTitle>
           <CardDescription className="text-base">
             Hola Municipality Inventory Management System
