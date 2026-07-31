@@ -19,7 +19,7 @@ export default function GRNDetail() {
   const updateMutation = useUpdateGRN();
   const { toast } = useToast();
   
-  const [inspectionStatus, setInspectionStatus] = useState<string>("passed");
+  const [inspectionStatus, setInspectionStatus] = useState<string>("accepted");
   const [inspectionNotes, setInspectionNotes] = useState("");
   const [isInspectOpen, setIsInspectOpen] = useState(false);
 
@@ -31,10 +31,9 @@ export default function GRNDetail() {
 
   const getInspectionBadge = (status: string) => {
     switch(status) {
-      case 'passed': return <Badge className="bg-emerald-100 text-emerald-800 border-none">Passed</Badge>;
-      case 'failed': return <Badge variant="destructive">Failed</Badge>;
-      case 'partial': return <Badge className="bg-amber-100 text-amber-800 border-none">Partial</Badge>;
-      default: return <Badge variant="outline">Pending</Badge>;
+      case 'accepted': return <Badge className="bg-emerald-100 text-emerald-800 border-none">Accepted</Badge>;
+      case 'rejected': return <Badge variant="destructive">Rejected</Badge>;
+      default: return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -94,9 +93,8 @@ export default function GRNDetail() {
                     <Select value={inspectionStatus} onValueChange={setInspectionStatus}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="passed">Passed</SelectItem>
-                        <SelectItem value="partial">Partial Pass</SelectItem>
-                        <SelectItem value="failed">Failed</SelectItem>
+                        <SelectItem value="accepted">Accepted</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -111,7 +109,7 @@ export default function GRNDetail() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            <Button onClick={handlePost} className="gap-2 bg-emerald-600 hover:bg-emerald-700" disabled={updateMutation.isPending || grn.inspectionStatus === 'failed' || grn.inspectionStatus === 'pending'}>
+            <Button onClick={handlePost} className="gap-2 bg-emerald-600 hover:bg-emerald-700" disabled={updateMutation.isPending || grn.inspectionStatus === 'rejected'}>
               <Check className="h-4 w-4" /> Post to Inventory
             </Button>
           </div>

@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useCreateGRN, useListSuppliers, useListInventoryItems, useGetMe, useListPurchaseOrders } from "@workspace/api-client-react";
+import { useCreateGRN, useListSuppliers, useListInventoryItems, useGetMe, useListPurchaseOrders, useListUsers } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,8 @@ const grnSchema = z.object({
   purchaseOrderId: z.coerce.number().optional(),
   deliveryNoteNumber: z.string().optional(),
   dateReceived: z.string().min(1, "Date is required"),
-  inspectionStatus: z.enum(["pending", "passed", "failed", "partial"]).default("pending"),
+  inspectionStatus: z.enum(["accepted", "rejected"]).default("accepted"),
+  officerId: z.coerce.number().min(1, "Officer is required"),
   notes: z.string().optional(),
   items: z.array(itemSchema).min(1, "Add at least one item")
 });
@@ -38,6 +39,7 @@ export default function GRNForm() {
   const { data: suppliers } = useListSuppliers();
   const { data: pos } = useListPurchaseOrders();
   const { data: inventoryItems } = useListInventoryItems();
+  const { data: users } = useListUsers();
   const createMutation = useCreateGRN();
 
   const form = useForm<z.infer<typeof grnSchema>>({
@@ -45,7 +47,8 @@ export default function GRNForm() {
     defaultValues: { 
       supplierId: 0, 
       dateReceived: format(new Date(), 'yyyy-MM-dd'),
-      inspectionStatus: "pending", 
+      inspectionStatus: "accepted", 
+      officerId: user?.id ?? 0,
       notes: "", 
       items: [] 
     },
@@ -73,11 +76,11 @@ export default function GRNForm() {
 
   const onSubmit = (values: z.infer<typeof grnSchema>) => {
     if (!user) return;
-    
+    const { officerId, ...rest } = values;
     createMutation.mutate({ 
       data: { 
-        ...values, 
-        receivingOfficerId: user.id 
+        ...rest, 
+        receivingOfficerId: officerId 
       } 
     }, {
       onSuccess: () => {
@@ -142,10 +145,22 @@ export default function GRNForm() {
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                     <SelectContent>
-                      <SelectItem value="pending">Pending Inspection</SelectItem>
-                      <SelectItem value="passed">Passed</SelectItem>
-                      <SelectItem value="partial">Partial Pass</SelectItem>
-                      <SelectItem value="failed">Failed</SelectItem>
+                      <SelectItem value="accepted">Accepted</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="officerId" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Officer Involved</FormLabel>
+                  <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value ? String(field.value) : ""}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select officer" /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      {users?.map(u => (
+                        <SelectItem key={u.id} value={String(u.id)}>{u.fullName} — {u.role.replace(/_/g, " ")}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
