@@ -21,6 +21,7 @@ export default function GRNs() {
     switch(status) {
       case 'accepted': return <Badge className="bg-emerald-100 text-emerald-800 border-none">Accepted</Badge>;
       case 'rejected': return <Badge variant="destructive">Rejected</Badge>;
+      case 'pending': return <Badge className="bg-amber-100 text-amber-800 border-none">Pending</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };

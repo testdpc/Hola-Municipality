@@ -26,7 +26,7 @@ const grnSchema = z.object({
   purchaseOrderId: z.coerce.number().optional(),
   deliveryNoteNumber: z.string().optional(),
   dateReceived: z.string().min(1, "Date is required"),
-  inspectionStatus: z.enum(["accepted", "rejected"]).default("accepted"),
+  inspectionStatus: z.enum(["pending", "accepted", "rejected"]).default("pending"),
   officerId: z.coerce.number().min(1, "Officer is required"),
   notes: z.string().optional(),
   items: z.array(itemSchema).min(1, "Add at least one item")
@@ -47,7 +47,7 @@ export default function GRNForm() {
     defaultValues: { 
       supplierId: 0, 
       dateReceived: format(new Date(), 'yyyy-MM-dd'),
-      inspectionStatus: "accepted", 
+      inspectionStatus: "pending", 
       officerId: user?.id ?? 0,
       notes: "", 
       items: [] 
@@ -145,6 +145,7 @@ export default function GRNForm() {
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                     <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="accepted">Accepted</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                     </SelectContent>

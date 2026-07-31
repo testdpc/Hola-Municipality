@@ -47,7 +47,7 @@ router.post("/grn", requireAuth, async (req, res): Promise<void> => {
   const [grn] = await db.insert(goodsReceivedNotesTable).values({
     grnNumber, supplierId: Number(supplierId), purchaseOrderId: purchaseOrderId ? Number(purchaseOrderId) : null,
     deliveryNoteNumber, dateReceived, receivingOfficerId: Number(receivingOfficerId),
-    inspectionStatus: inspectionStatus || "accepted", status: "draft", notes,
+    inspectionStatus: inspectionStatus || "pending", status: "draft", notes,
   }).returning();
 
   if (items?.length) {

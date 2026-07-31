@@ -33,6 +33,7 @@ export default function GRNDetail() {
     switch(status) {
       case 'accepted': return <Badge className="bg-emerald-100 text-emerald-800 border-none">Accepted</Badge>;
       case 'rejected': return <Badge variant="destructive">Rejected</Badge>;
+      case 'pending': return <Badge className="bg-amber-100 text-amber-800 border-none">Pending</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };
@@ -93,6 +94,7 @@ export default function GRNDetail() {
                     <Select value={inspectionStatus} onValueChange={setInspectionStatus}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="accepted">Accepted</SelectItem>
                         <SelectItem value="rejected">Rejected</SelectItem>
                       </SelectContent>
@@ -109,7 +111,7 @@ export default function GRNDetail() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            <Button onClick={handlePost} className="gap-2 bg-emerald-600 hover:bg-emerald-700" disabled={updateMutation.isPending || grn.inspectionStatus === 'rejected'}>
+            <Button onClick={handlePost} className="gap-2 bg-emerald-600 hover:bg-emerald-700" disabled={updateMutation.isPending || grn.inspectionStatus === 'rejected' || grn.inspectionStatus === 'pending'}>
               <Check className="h-4 w-4" /> Post to Inventory
             </Button>
           </div>
