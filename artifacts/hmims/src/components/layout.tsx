@@ -105,7 +105,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <div className="group-data-[collapsible=icon]:hidden flex flex-col items-center gap-2 px-4 py-6">
             <div className="w-20 h-20 rounded-xl bg-card/10 backdrop-blur-sm p-2 flex items-center justify-center">
               <img
-                src="/tana-river-logo.jpeg"
+                src="/tana-river-logo.png"
                 alt="County Government of Tana River"
                 className="w-full h-full object-contain"
               />
@@ -126,7 +126,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center h-16">
             <div className="w-10 h-10 rounded-lg bg-card/10 backdrop-blur-sm p-1.5 flex items-center justify-center">
               <img
-                src="/tana-river-logo.jpeg"
+                src="/tana-river-logo.png"
                 alt="Tana River County"
                 className="w-full h-full object-contain"
               />
