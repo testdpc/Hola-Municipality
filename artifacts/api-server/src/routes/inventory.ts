@@ -83,23 +83,32 @@ router.get("/inventory/expiring", requireAuth, async (_req, res): Promise<void> 
 });
 
 router.post("/inventory", requireAuth, async (req, res): Promise<void> => {
-  const { itemCode, barcodeQr, itemName, categoryId, description, unitOfMeasure, currentQuantity, minimumStock, maximumStock, reorderLevel, shelfBinLocation, purchasePrice, supplierId, dateReceived, expiryDate } = req.body;
-  if (!itemCode || !itemName || !categoryId || !unitOfMeasure) {
-    res.status(400).json({ error: "itemCode, itemName, categoryId, unitOfMeasure are required" });
+  const { barcodeQr, itemName, categoryId, description, unitOfMeasure, currentQuantity, minimumStock, maximumStock, reorderLevel, shelfBinLocation, purchasePrice, supplierId, dateReceived, expiryDate } = req.body;
+  if (!itemName || !categoryId || !unitOfMeasure) {
+    res.status(400).json({ error: "itemName, categoryId, unitOfMeasure are required" });
     return;
   }
   const qty = currentQuantity ?? 0;
   const minStock = minimumStock ?? 0;
   const status = computeStatus(qty, minStock);
 
+  const [lastItem] = await db
+    .select({ id: inventoryItemsTable.id })
+    .from(inventoryItemsTable)
+    .orderBy(sql`${inventoryItemsTable.id} DESC`)
+    .limit(1);
+
+  const nextNumber = (lastItem?.id ?? 0) + 1;
+  const autoItemCode = `HM-${String(nextNumber).padStart(6, "0")}`;
+
   const [item] = await db.insert(inventoryItemsTable).values({
-    itemCode, barcodeQr, itemName, categoryId: Number(categoryId), description, unitOfMeasure,
+    itemCode: autoItemCode, barcodeQr, itemName, categoryId: Number(categoryId), description, unitOfMeasure,
     currentQuantity: Number(qty), minimumStock: Number(minStock),
     maximumStock: Number(maximumStock ?? 1000), reorderLevel: Number(reorderLevel ?? 10),
     shelfBinLocation, purchasePrice: String(purchasePrice ?? 0),
     supplierId: supplierId ? Number(supplierId) : null, dateReceived, expiryDate, status,
   }).returning();
-  await createAuditLog(req.user!, "CREATE", "inventory_items", item.id, null, { itemCode, itemName });
+  await createAuditLog(req.user!, "CREATE", "inventory_items", item.id, null, { itemCode: autoItemCode, itemName });
   res.status(201).json(await formatItem(item));
 });
 

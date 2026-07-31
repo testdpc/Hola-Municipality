@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDepartments } from "@/hooks/use-departments";
 
 const itemSchema = z.object({
   inventoryItemId: z.coerce.number().min(1, "Required"),
@@ -32,6 +33,7 @@ export default function PurchaseOrderForm() {
   const { toast } = useToast();
   const { data: suppliers } = useListSuppliers();
   const { data: inventoryItems } = useListInventoryItems();
+  const { data: departments } = useDepartments();
   const createMutation = useCreatePurchaseOrder();
 
   const form = useForm<z.infer<typeof poSchema>>({
@@ -86,7 +88,20 @@ export default function PurchaseOrderForm() {
                 </FormItem>
               )} />
               <FormField control={form.control} name="department" render={({ field }) => (
-                <FormItem><FormLabel>Requesting Department</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem>
+                  <FormLabel>Requesting Department</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <FormControl>
+                      <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {(departments || []).map(d => (
+                        <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
               )} />
               <div className="md:col-span-2">
                 <FormField control={form.control} name="notes" render={({ field }) => (

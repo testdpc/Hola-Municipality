@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useDepartments } from "@/hooks/use-departments";
 
 const itemSchema = z.object({
   inventoryItemId: z.coerce.number().min(1, "Required"),
@@ -30,6 +31,7 @@ export default function StockIssueForm() {
   const { toast } = useToast();
   const { data: user } = useGetMe();
   const { data: inventoryItems } = useListInventoryItems();
+  const { data: departments } = useDepartments();
   const createMutation = useCreateStockIssue();
 
   const form = useForm<z.infer<typeof schema>>({
@@ -78,7 +80,20 @@ export default function StockIssueForm() {
             <CardHeader><CardTitle>Request Details</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField control={form.control} name="department" render={({ field }) => (
-                <FormItem><FormLabel>Department</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem>
+                  <FormLabel>Department</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <FormControl>
+                      <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {(departments || []).map(d => (
+                        <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
               )} />
               <FormField control={form.control} name="issueDate" render={({ field }) => (
                 <FormItem><FormLabel>Request Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
