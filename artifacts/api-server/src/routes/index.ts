@@ -1,8 +1,38 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
+import authRouter from "./auth";
+import usersRouter from "./users";
+import dashboardRouter from "./dashboard";
+import categoriesRouter from "./categories";
+import suppliersRouter from "./suppliers";
+import inventoryRouter from "./inventory";
+import purchaseOrdersRouter from "./purchaseOrders";
+import grnRouter from "./grn";
+import stockIssuesRouter from "./stockIssues";
+import stockReturnsRouter from "./stockReturns";
+import stockAdjustmentsRouter from "./stockAdjustments";
+import stockTakingRouter from "./stockTaking";
+import notificationsRouter from "./notifications";
+import auditRouter from "./audit";
+import reportsRouter from "./reports";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(authRouter);
+router.use(usersRouter);
+router.use(dashboardRouter);
+router.use(categoriesRouter);
+router.use(suppliersRouter);
+router.use(inventoryRouter);
+router.use(purchaseOrdersRouter);
+router.use(grnRouter);
+router.use(stockIssuesRouter);
+router.use(stockReturnsRouter);
+router.use(stockAdjustmentsRouter);
+router.use(stockTakingRouter);
+router.use(notificationsRouter);
+router.use(auditRouter);
+router.use(reportsRouter);
 
 export default router;

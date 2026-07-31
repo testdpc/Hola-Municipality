@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "HMIMS - Hola Municipality Inventory"
+version = "1.0.0"
+id = "artifacts/hmims"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23568
+
+[services.development]
+run = "pnpm --filter @workspace/hmims run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/hmims", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/hmims/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23568"
+BASE_PATH = "/"
