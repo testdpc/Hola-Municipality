@@ -1,0 +1,66 @@
+/* Design tokens for HMIMS enterprise design system
+   Deep Navy government palette
+   CSS variables are the source of truth. Prepared for future dark mode.
+*/
+:root {
+  /* Colors */
+  --color-primary: #083a5a; /* Deep Navy */
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #0f7e7e; /* Medical teal */
+  --color-success: #2e7d32; /* Green */
+  --color-warning: #d97706; /* Amber */
+  --color-danger: #b91c1c; /* Red */
+
+  /* Neutrals */
+  --color-bg: #f6f7f9; /* warm gray background */
+  --color-surface: #ffffff; /* card surface */
+  --color-muted: #6b7280; /* muted text */
+  --color-border: #e6e9ee; /* border */
+  --color-foreground: #0f1724; /* main text */
+
+  /* Typography scale */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+
+  /* Spacing (base unit = 4px) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);
+  --shadow-md: 0 4px 12px rgba(16,24,40,0.08);
+  --shadow-lg: 0 10px 30px rgba(16,24,40,0.12);
+
+  /* Focus */
+  --focus-ring: 0 0 0 3px rgba(8,58,90,0.12);
+}
+
+/* Dark mode placeholders - not active until .dark is applied */
+.dark {
+  --color-primary: #0b3b54;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #0f7e7e;
+  --color-bg: #0b1220;
+  --color-surface: #0f1724;
+  --color-muted: #9aa3b2;
+  --color-border: #1f2937;
+  --color-foreground: #e6eef6;
+}
