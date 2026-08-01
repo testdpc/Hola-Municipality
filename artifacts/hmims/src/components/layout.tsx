@@ -95,15 +95,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
     }
   ];
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_40%),linear-gradient(135deg,_hsl(var(--background))_0%,_hsl(var(--muted))_100%)] text-muted-foreground">Loading...</div>;
 
   return (
     <SidebarProvider>
       <Sidebar variant="sidebar" collapsible="icon">
-        <SidebarHeader className="border-b border-sidebar-border bg-sidebar/50">
+        <SidebarHeader className="border-b border-sidebar-border/70 bg-sidebar/95">
           {/* Expanded header — visible when sidebar is open */}
           <div className="group-data-[collapsible=icon]:hidden flex flex-col items-center gap-2 px-4 py-6">
-            <div className="w-20 h-20 rounded-xl bg-card/10 backdrop-blur-sm p-2 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-2xl border border-white/10 bg-white/10 backdrop-blur-sm p-2 flex items-center justify-center shadow-lg">
               <img
                 src="/tana-river-logo.jpeg"
                 alt="County Government of Tana River"
@@ -124,7 +124,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
           {/* Collapsed icon — visible only when sidebar is icon-only */}
           <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center h-16">
-            <div className="w-10 h-10 rounded-lg bg-card/10 backdrop-blur-sm p-1.5 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl border border-white/10 bg-white/10 backdrop-blur-sm p-1.5 flex items-center justify-center">
               <img
                 src="/tana-river-logo.jpeg"
                 alt="Tana River County"
@@ -157,9 +157,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </SidebarGroup>
           ))}
         </SidebarContent>
-        <SidebarFooter className="border-t border-sidebar-border p-4">
+        <SidebarFooter className="border-t border-sidebar-border/70 p-4">
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 truncate">
+            <div className="flex items-center gap-2 truncate rounded-xl border border-white/10 bg-white/5 p-2.5">
               <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-foreground shrink-0 uppercase">
                 {user?.fullName?.charAt(0) || "U"}
               </div>
@@ -168,17 +168,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <span className="text-xs text-sidebar-foreground/70 truncate">{user?.role?.replace('_', ' ')}</span>
               </div>
             </div>
-            <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
+            <Button variant="outline" className="w-full justify-start gap-2 border-white/10 bg-white/5 text-sidebar-foreground hover:bg-white/10" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
               <span>Log out</span>
             </Button>
           </div>
         </SidebarFooter>
       </Sidebar>
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-background">
-        <header className="h-16 border-b flex items-center px-4 shrink-0 bg-card">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.08),_transparent_32%),linear-gradient(180deg,_hsl(var(--background))_0%,_hsl(var(--muted))_100%)]">
+        <header className="h-16 border-b border-border/70 bg-card/80 backdrop-blur px-4 shrink-0 flex items-center">
           <SidebarTrigger />
-          <div className="ml-4 font-semibold text-lg">Hola Municipality</div>
+          <div className="ml-4">
+            <div className="font-semibold text-lg text-foreground">Hola Municipality</div>
+            <div className="text-xs text-muted-foreground">Enterprise inventory command center</div>
+          </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
           {children}

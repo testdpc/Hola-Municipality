@@ -12,7 +12,7 @@ export default function Dashboard() {
 
   const statCards = [
     { title: "Total Items", value: stats?.totalItems, icon: Package, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-    { title: "Total Value", value: stats ? `KES ${stats.totalValue.toLocaleString()}` : null, icon: DollarSign, color: "text-[hsl(var(--chart-2))]", bg: "bg-[hsl(var(--chart-2))]/10", border: "border-[hsl(var(--chart-2))]/20" },
+    { title: "Total Value", value: stats?.totalValue != null ? `KES ${stats.totalValue.toLocaleString()}` : null, icon: DollarSign, color: "text-[hsl(var(--chart-2))]", bg: "bg-[hsl(var(--chart-2))]/10", border: "border-[hsl(var(--chart-2))]/20" },
     { title: "Low Stock", value: stats?.lowStockCount, icon: AlertTriangle, color: "text-[hsl(var(--chart-5))]", bg: "bg-[hsl(var(--chart-5))]/10", border: "border-[hsl(var(--chart-5))]/20" },
     { title: "Out of Stock", value: stats?.outOfStockCount, icon: XCircle, color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20" },
     { title: "Pending Requisitions", value: stats?.pendingRequisitions, icon: ShoppingCart, color: "text-[hsl(var(--chart-4))]", bg: "bg-[hsl(var(--chart-4))]/10", border: "border-[hsl(var(--chart-4))]/20" },
@@ -22,14 +22,22 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Real-time inventory overview and system alerts</p>
+      <div className="rounded-3xl border border-border/70 bg-card/80 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary">Operations overview</div>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-foreground">Dashboard</h1>
+            <p className="mt-1 text-muted-foreground">Real-time inventory overview and system alerts</p>
+          </div>
+          <div className="rounded-2xl border border-border/70 bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
+            Live status for procurement, stock movement, and service delivery.
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
         {statCards.map((stat, i) => (
-          <Card key={i} className={`shadow-sm border ${stat.border} hover:shadow-md transition-shadow`}>
+          <Card key={i} className={`border ${stat.border} bg-card/90 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg`}>
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-[10px] font-bold uppercase text-muted-foreground tracking-wide">{stat.title}</CardTitle>
               <div className={`p-2 rounded-md ${stat.bg}`}>
@@ -48,14 +56,14 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="col-span-2 shadow-sm border-border/50">
+        <Card className="col-span-2 border-border/70 bg-card/90 shadow-sm">
           <CardHeader>
             <CardTitle className="text-xl font-bold">Stock Movement (Last 6 Months)</CardTitle>
           </CardHeader>
           <CardContent>
             {chartLoading ? (
               <Skeleton className="h-[350px] w-full" />
-            ) : chartData ? (
+            ) : Array.isArray(chartData) && chartData.length > 0 ? (
               <div className="h-[350px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
@@ -69,11 +77,13 @@ export default function Dashboard() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            ) : null}
+            ) : (
+              <div className="p-6 text-center text-muted-foreground text-sm">No chart data available.</div>
+            )}
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-border/50">
+        <Card className="border-border/70 bg-card/90 shadow-sm">
           <CardHeader>
             <CardTitle className="text-xl font-bold">Recent Transactions</CardTitle>
           </CardHeader>
@@ -86,29 +96,30 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="divide-y divide-border/50 max-h-[350px] overflow-y-auto">
-                {transactions?.map((tx) => (
-                  <div key={tx.id} className="p-4 flex items-start gap-3 hover:bg-muted/30 transition-colors">
-                    <div className={`p-2 rounded-lg mt-0.5 shrink-0 ${
-                      tx.type === 'received' ? 'bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]' :
-                      tx.type === 'issued' ? 'bg-primary/10 text-primary' :
-                      tx.type === 'returned' ? 'bg-[hsl(var(--chart-4))]/10 text-[hsl(var(--chart-4))]' :
-                      'bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]'
-                    }`}>
-                      {tx.type === 'received' && <Truck className="h-4 w-4" />}
-                      {tx.type === 'issued' && <ShoppingCart className="h-4 w-4" />}
-                      {tx.type === 'returned' && <RefreshCcw className="h-4 w-4" />}
-                      {tx.type === 'adjusted' && <AlertTriangle className="h-4 w-4" />}
+                {Array.isArray(transactions) && transactions.length > 0 ? (
+                  transactions.map((tx) => (
+                    <div key={tx.id} className="p-4 flex items-start gap-3 hover:bg-muted/30 transition-colors">
+                      <div className={`p-2 rounded-lg mt-0.5 shrink-0 ${
+                        tx.type === 'received' ? 'bg-[hsl(var(--chart-3))]/10 text-[hsl(var(--chart-3))]' :
+                        tx.type === 'issued' ? 'bg-primary/10 text-primary' :
+                        tx.type === 'returned' ? 'bg-[hsl(var(--chart-4))]/10 text-[hsl(var(--chart-4))]' :
+                        'bg-[hsl(var(--chart-2))]/10 text-[hsl(var(--chart-2))]'
+                      }`}>
+                        {tx.type === 'received' && <Truck className="h-4 w-4" />}
+                        {tx.type === 'issued' && <ShoppingCart className="h-4 w-4" />}
+                        {tx.type === 'returned' && <RefreshCcw className="h-4 w-4" />}
+                        {tx.type === 'adjusted' && <AlertTriangle className="h-4 w-4" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">{tx.description}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Qty: {tx.quantity} • By {tx.user}</p>
+                      </div>
+                      <div className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+                        {format(new Date(tx.timestamp), "MMM d, HH:mm")}
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{tx.description}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Qty: {tx.quantity} • By {tx.user}</p>
-                    </div>
-                    <div className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
-                      {format(new Date(tx.timestamp), "MMM d, HH:mm")}
-                    </div>
-                  </div>
-                ))}
-                {transactions?.length === 0 && (
+                  ))
+                ) : (
                   <div className="p-6 text-center text-muted-foreground text-sm">No recent transactions.</div>
                 )}
               </div>
