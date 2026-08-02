@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { useGetMe, useLogout } from "@workspace/api-client-react";
 import {
   Sidebar,
@@ -34,16 +35,21 @@ import {
 } from "lucide-react";
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const { data: user, isLoading } = useGetMe();
   const logout = useLogout();
 
+  const clearSession = () => {
+    localStorage.removeItem("hmims_token");
+    queryClient.removeQueries();
+    setLocation("/login");
+  };
+
   const handleLogout = () => {
     logout.mutate(undefined, {
-      onSuccess: () => {
-        localStorage.removeItem("hmims_token");
-        window.location.href = "/login";
-      }
+      onSuccess: clearSession,
+      onError: clearSession,
     });
   };
 
@@ -102,10 +108,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <Sidebar variant="sidebar" collapsible="icon">
         <SidebarHeader className="border-b border-sidebar-border/70 bg-sidebar/95">
           {/* Expanded header — visible when sidebar is open */}
-          <div className="group-data-[collapsible=icon]:hidden flex flex-col items-center gap-2 px-4 py-6">
-            <div className="w-20 h-20 rounded-2xl border border-white/10 bg-white/10 backdrop-blur-sm p-2 flex items-center justify-center shadow-lg">
+          <div className="group-data-[collapsible=icon]:hidden flex flex-col items-center gap-3 px-4 py-6">
+            <div className="w-28 h-28 rounded-2xl border border-white/10 backdrop-blur-sm p-2 flex items-center justify-center shadow-lg">
               <img
-                src="/tana-river-logo.jpeg"
+                src="/tana-river-logo.png"
                 alt="County Government of Tana River"
                 className="w-full h-full object-contain"
               />
@@ -124,9 +130,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
           {/* Collapsed icon — visible only when sidebar is icon-only */}
           <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center h-16">
-            <div className="w-10 h-10 rounded-xl border border-white/10 bg-white/10 backdrop-blur-sm p-1.5 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-xl border border-white/10 backdrop-blur-sm p-1.5 flex items-center justify-center">
               <img
-                src="/tana-river-logo.jpeg"
+                src="/tana-river-logo.png"
                 alt="Tana River County"
                 className="w-full h-full object-contain"
               />

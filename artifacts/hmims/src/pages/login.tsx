@@ -40,12 +40,6 @@ export default function Login() {
   });
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-<<<<<<< Updated upstream
-    loginMutation.mutate({ data: values }, {
-      onSuccess: (res) => {
-        localStorage.setItem("hmims_token", res.token);
-        setLocation("/dashboard");
-=======
     const isDefaultAdminLogin =
       values.username.toLowerCase() === DEFAULT_ADMIN_CREDENTIALS.username &&
       values.password === DEFAULT_ADMIN_CREDENTIALS.password;
@@ -60,29 +54,18 @@ export default function Login() {
       return;
     }
 
-    loginMutation.mutate(
-      { data: values },
-      {
-        onSuccess: (res) => {
-          localStorage.setItem("hmims_token", res.token);
-          setLocation("/dashboard");
-        },
-        onError: () => {
-          toast({
-            title: "Login failed",
-            description: "Invalid credentials.",
-            variant: "destructive",
-          });
-        },
->>>>>>> Stashed changes
+    loginMutation.mutate({ data: values }, {
+      onSuccess: (res) => {
+        localStorage.setItem("hmims_token", res.token);
+        setLocation("/dashboard");
       },
       onError: () => {
         toast({
           title: "Login failed",
           description: "Invalid credentials.",
-          variant: "destructive"
+          variant: "destructive",
         });
-      }
+      },
     });
   }
 
@@ -93,14 +76,17 @@ export default function Login() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.05),transparent_50%)]" />
         
-        <div className="relative z-10">
+        <div className="relative z-10 text-center">
           <img
-            src="/tana-river-logo.jpeg"
+            src="/tana-river-logo.png"
             alt="County Government of Tana River"
-            className="w-32 h-32 object-contain mb-6 drop-shadow-2xl bg-white/10 p-4 rounded-xl backdrop-blur-sm"
+            className="mx-auto w-[240px] h-[240px] object-contain mb-10 drop-shadow-2xl"
           />
-          <h1 className="text-5xl font-extrabold tracking-tight mb-3 drop-shadow-lg">HMIMS</h1>
-          <p className="text-xl text-primary-foreground/90 font-medium mb-2">
+          <h1 className="text-5xl font-extrabold tracking-tight mb-6 drop-shadow-lg">HMIMS</h1>
+          <p className="text-base uppercase font-semibold tracking-[0.24em] text-amber-200 mb-2">
+            Enterprise Inventory System
+          </p>
+          <p className="text-xl text-white font-semibold mb-4">
             Hola Municipality
           </p>
           <p className="text-lg text-primary-foreground/80 max-w-md leading-relaxed">
@@ -116,9 +102,14 @@ export default function Login() {
               <p className="text-sm">Procurement & Stock Control Platform</p>
             </div>
           </div>
-          <p className="text-xs text-primary-foreground/60 pl-6">
-            Government of Kenya • Authorized Personnel Only
-          </p>
+          <div className="text-center">
+            <p className="text-xs text-primary-foreground/60">
+              Government of Kenya • Authorized Personnel Only
+            </p>
+            <p className="text-xs text-primary-foreground/40 mt-3">
+              © Copyright 2026 Tana River County Government
+            </p>
+          </div>
         </div>
       </div>
 
@@ -128,29 +119,20 @@ export default function Login() {
           {/* Mobile Logo */}
           <div className="md:hidden text-center mb-8">
             <img
-              src="/tana-river-logo.jpeg"
+              src="/tana-river-logo.png"
               alt="County Government of Tana River"
-              className="mx-auto w-24 h-24 object-contain mb-4"
+              className="mx-auto w-[200px] h-auto object-contain mb-4"
             />
             <h1 className="text-3xl font-bold text-foreground">HMIMS</h1>
             <p className="text-muted-foreground mt-1">Hola Municipality</p>
           </div>
 
-          <div className="mb-8">
-<<<<<<< Updated upstream
-            <h2 className="text-2xl font-bold text-foreground mb-2">Welcome Back</h2>
-            <p className="text-muted-foreground">Sign in to access the inventory system</p>
-=======
+          <div className="mb-8 pt-4">
             <div className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary mb-4">
               Secure access
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">
-              Welcome Back
-            </h2>
-            <p className="text-muted-foreground">
-              Sign in to access the inventory system
-            </p>
->>>>>>> Stashed changes
+            <h2 className="text-2xl font-bold text-foreground mb-2">Welcome Back</h2>
+            <p className="text-muted-foreground">Sign in to access the inventory system</p>
           </div>
 
           <Form {...form}>
@@ -162,18 +144,11 @@ export default function Login() {
                   <FormItem>
                     <FormLabel className="text-sm font-semibold text-foreground">Username</FormLabel>
                     <FormControl>
-<<<<<<< Updated upstream
-                      <Input 
-                        placeholder="Enter your username" 
-                        {...field} 
-                        className="h-11 bg-card border-border focus:border-primary transition-colors" 
-=======
                       <Input
                         placeholder="Enter your username"
                         autoComplete="username"
                         {...field}
-                        className="h-11 bg-card/90"
->>>>>>> Stashed changes
+                        className="h-11 bg-card/90 border-border focus:border-primary transition-colors"
                       />
                     </FormControl>
                     <FormMessage />
@@ -187,35 +162,21 @@ export default function Login() {
                   <FormItem>
                     <FormLabel className="text-sm font-semibold text-foreground">Password</FormLabel>
                     <FormControl>
-<<<<<<< Updated upstream
-                      <Input 
-                        type="password" 
-                        placeholder="Enter your password" 
-                        {...field} 
-                        className="h-11 bg-card border-border focus:border-primary transition-colors" 
-=======
                       <Input
                         type="password"
                         placeholder="Enter your password"
                         autoComplete="current-password"
                         {...field}
-                        className="h-11 bg-card/90"
->>>>>>> Stashed changes
+                        className="h-11 bg-card/90 border-border focus:border-primary transition-colors"
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-<<<<<<< Updated upstream
-              <Button 
-                type="submit" 
-                className="w-full h-11 text-base font-semibold shadow-lg hover:shadow-xl transition-shadow" 
-=======
               <Button
                 type="submit"
                 className="w-full h-11 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
->>>>>>> Stashed changes
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? "Authenticating..." : "Sign In"}

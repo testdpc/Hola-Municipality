@@ -10,6 +10,17 @@ export default function Dashboard() {
   const { data: transactions, isLoading: txLoading } = useGetRecentTransactions();
   const { data: chartData, isLoading: chartLoading } = useGetStockMovementChart();
 
+  const validChartData = Array.isArray(chartData)
+    ? chartData.filter(
+        (item) =>
+          item !== null &&
+          typeof item === 'object' &&
+          typeof (item as any).month === 'string' &&
+          typeof (item as any).received === 'number' &&
+          typeof (item as any).issued === 'number',
+      )
+    : [];
+
   const statCards = [
     { title: "Total Items", value: stats?.totalItems, icon: Package, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
     { title: "Total Value", value: stats?.totalValue != null ? `KES ${stats.totalValue.toLocaleString()}` : null, icon: DollarSign, color: "text-[hsl(var(--chart-2))]", bg: "bg-[hsl(var(--chart-2))]/10", border: "border-[hsl(var(--chart-2))]/20" },
@@ -63,10 +74,10 @@ export default function Dashboard() {
           <CardContent>
             {chartLoading ? (
               <Skeleton className="h-[350px] w-full" />
-            ) : Array.isArray(chartData) && chartData.length > 0 ? (
+            ) : validChartData.length > 0 ? (
               <div className="h-[350px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                  <BarChart data={validChartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))' }} />

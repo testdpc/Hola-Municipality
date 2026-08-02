@@ -35,8 +35,8 @@ export default function InventoryForm() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const { data: item, isLoading: loadingItem } = useGetInventoryItem(Number(id), { 
-    query: { enabled: !isNew } 
+  const { data: item, isLoading: loadingItem } = useGetInventoryItem(Number(id), {
+    query: { queryKey: ['inventory-item', Number(id)], enabled: !isNew }
   });
   const { data: categories } = useListCategories();
   const { data: suppliers } = useListSuppliers();

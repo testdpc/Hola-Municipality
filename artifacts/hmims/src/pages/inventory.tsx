@@ -10,7 +10,7 @@ import { Plus, Search, Eye, Filter } from "lucide-react";
 
 export default function InventoryList() {
   const [search, setSearch] = useState("");
-  const { data: items, isLoading } = useListInventoryItems({ query: { search } });
+  const { data: items, isLoading } = useListInventoryItems({ search });
   const [, setLocation] = useLocation();
 
   return (
