@@ -12,6 +12,32 @@ function computeStatus(current: number, min: number): string {
   return "available";
 }
 
+function sanitizeItemCode(value: string): string {
+  const normalized = value
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-+/g, "-")
+    .slice(0, 20);
+  return normalized || "ITEM";
+}
+
+async function generateItemCode(itemName: string) {
+  const base = sanitizeItemCode(itemName);
+  let candidate = base;
+  let count = 1;
+
+  while (true) {
+    const [exists] = await db.select().from(inventoryItemsTable).where(eq(inventoryItemsTable.itemCode, candidate));
+    if (!exists) {
+      return candidate;
+    }
+    candidate = `${base}-${String(count).padStart(3, "0")}`;
+    count += 1;
+  }
+}
+
 async function formatItem(item: typeof inventoryItemsTable.$inferSelect) {
   const [cat] = item.categoryId
     ? await db.select({ name: categoriesTable.name }).from(categoriesTable).where(eq(categoriesTable.id, item.categoryId))
@@ -84,22 +110,43 @@ router.get("/inventory/expiring", requireAuth, async (_req, res): Promise<void> 
 
 router.post("/inventory", requireAuth, async (req, res): Promise<void> => {
   const { itemCode, barcodeQr, itemName, categoryId, description, unitOfMeasure, currentQuantity, minimumStock, maximumStock, reorderLevel, shelfBinLocation, purchasePrice, supplierId, dateReceived, expiryDate } = req.body;
-  if (!itemCode || !itemName || !categoryId || !unitOfMeasure) {
-    res.status(400).json({ error: "itemCode, itemName, categoryId, unitOfMeasure are required" });
+  if (!itemName || !categoryId || !unitOfMeasure) {
+    res.status(400).json({ error: "itemName, categoryId, and unitOfMeasure are required" });
     return;
   }
+
+  const normalizedItemCode = itemCode ? sanitizeItemCode(String(itemCode)) : await generateItemCode(itemName);
+  if (itemCode) {
+    const [existingItemCode] = await db.select().from(inventoryItemsTable).where(eq(inventoryItemsTable.itemCode, normalizedItemCode));
+    if (existingItemCode) {
+      res.status(409).json({ error: "Item code already exists" });
+      return;
+    }
+  }
+
   const qty = currentQuantity ?? 0;
   const minStock = minimumStock ?? 0;
   const status = computeStatus(qty, minStock);
 
   const [item] = await db.insert(inventoryItemsTable).values({
-    itemCode, barcodeQr, itemName, categoryId: Number(categoryId), description, unitOfMeasure,
-    currentQuantity: Number(qty), minimumStock: Number(minStock),
-    maximumStock: Number(maximumStock ?? 1000), reorderLevel: Number(reorderLevel ?? 10),
-    shelfBinLocation, purchasePrice: String(purchasePrice ?? 0),
-    supplierId: supplierId ? Number(supplierId) : null, dateReceived, expiryDate, status,
+    itemCode: normalizedItemCode,
+    barcodeQr,
+    itemName,
+    categoryId: Number(categoryId),
+    description,
+    unitOfMeasure,
+    currentQuantity: Number(qty),
+    minimumStock: Number(minStock),
+    maximumStock: Number(maximumStock ?? 1000),
+    reorderLevel: Number(reorderLevel ?? 10),
+    shelfBinLocation,
+    purchasePrice: String(purchasePrice ?? 0),
+    supplierId: supplierId ? Number(supplierId) : null,
+    dateReceived,
+    expiryDate,
+    status,
   }).returning();
-  await createAuditLog(req.user!, "CREATE", "inventory_items", item.id, null, { itemCode, itemName });
+  await createAuditLog(req.user!, "CREATE", "inventory_items", item.id, null, { itemCode: normalizedItemCode, itemName });
   res.status(201).json(await formatItem(item));
 });
 
@@ -117,9 +164,28 @@ router.patch("/inventory/:id", requireAuth, async (req, res): Promise<void> => {
   for (const f of fields) {
     if (req.body[f] !== undefined) updates[f] = req.body[f];
   }
-  if (updates.categoryId) updates.categoryId = Number(updates.categoryId);
-  if (updates.supplierId) updates.supplierId = Number(updates.supplierId);
-  if (updates.purchasePrice) updates.purchasePrice = String(updates.purchasePrice);
+
+  if (updates.itemCode !== undefined) {
+    const candidate = String(updates.itemCode).trim();
+    if (!candidate) {
+      res.status(400).json({ error: "Item code cannot be empty" });
+      return;
+    }
+    const normalizedCode = sanitizeItemCode(candidate);
+    const [existingCode] = await db
+      .select()
+      .from(inventoryItemsTable)
+      .where(and(eq(inventoryItemsTable.itemCode, normalizedCode), sql`${inventoryItemsTable.id} != ${id}`));
+    if (existingCode) {
+      res.status(409).json({ error: "Item code already exists" });
+      return;
+    }
+    updates.itemCode = normalizedCode;
+  }
+
+  if (updates.categoryId !== undefined) updates.categoryId = Number(updates.categoryId);
+  if (updates.supplierId !== undefined) updates.supplierId = updates.supplierId !== null ? Number(updates.supplierId) : null;
+  if (updates.purchasePrice !== undefined) updates.purchasePrice = String(updates.purchasePrice);
 
   // Recompute status
   const [existing] = await db.select().from(inventoryItemsTable).where(eq(inventoryItemsTable.id, id));

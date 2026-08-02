@@ -2,14 +2,14 @@
   "name": "@workspace/db",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "exports": {
-    ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts"
+    ".": "./dist/index.js",
+    "./schema": "./dist/schema/index.js"
   },
   "scripts": {
-    "push": "drizzle-kit push --config ./drizzle.config.ts",
-    "push-force": "drizzle-kit push --force --config ./drizzle.config.ts"
+    "push": "node --loader ts-node/esm ../../node_modules/.pnpm/drizzle-kit@0.31.10/node_modules/drizzle-kit/bin.cjs push --config ./drizzle.config.ts",
+    "push-force": "node --loader ts-node/esm ../../node_modules/.pnpm/drizzle-kit@0.31.10/node_modules/drizzle-kit/bin.cjs push --force --config ./drizzle.config.ts"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",
@@ -20,6 +20,8 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/pg": "^8.20.0",
-    "drizzle-kit": "^0.31.10"
+    "drizzle-kit": "^0.31.10",
+    "ts-node": "^10.9.1",
+    "dotenv": "^16.1.4"
   }
 }

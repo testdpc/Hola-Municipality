@@ -18,16 +18,18 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { 
-  BarChart3, 
-  Package, 
-  Layers, 
-  Users, 
-  Truck, 
-  ShoppingCart, 
-  FileText, 
-  AlertCircle, 
-  RefreshCcw, 
-  ShieldCheck, 
+  BarChart3,
+  Package,
+  Layers,
+  Users,
+  Building,
+  Box,
+  Truck,
+  ShoppingCart,
+  FileText,
+  AlertCircle,
+  RefreshCcw,
+  ShieldCheck,
   Settings,
   LogOut,
   Bell,
@@ -65,7 +67,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
       items: [
         { label: "Items", href: "/inventory", icon: Package },
         { label: "Categories", href: "/categories", icon: Layers },
-        { label: "Suppliers", href: "/suppliers", icon: Users }
+        { label: "Suppliers", href: "/suppliers", icon: Users },
+        { label: "Departments", href: "/departments", icon: Building },
+        { label: "Units", href: "/units", icon: Box },
+        { label: "Stores", href: "/stores", icon: Layers }
       ]
     },
     {
@@ -106,10 +111,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <Sidebar variant="sidebar" collapsible="icon">
-        <SidebarHeader className="border-b border-sidebar-border/70 bg-sidebar/95">
+        <SidebarHeader className="border-b border-sidebar-border/70 bg-sidebar/95 py-1">
           {/* Expanded header — visible when sidebar is open */}
-          <div className="group-data-[collapsible=icon]:hidden flex flex-col items-center gap-3 px-4 py-6">
-            <div className="w-28 h-28 rounded-2xl border border-white/10 backdrop-blur-sm p-2 flex items-center justify-center shadow-lg">
+          <div className="group-data-[collapsible=icon]:hidden flex flex-col items-center gap-1 px-4 py-1">
+            <div className="w-[200px] h-[200px] flex items-center justify-center">
               <img
                 src="/tana-river-logo.png"
                 alt="County Government of Tana River"
@@ -129,8 +134,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
           {/* Collapsed icon — visible only when sidebar is icon-only */}
-          <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center h-16">
-            <div className="w-14 h-14 rounded-xl border border-white/10 backdrop-blur-sm p-1.5 flex items-center justify-center">
+          <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center h-20">
+            <div className="w-[80px] h-[80px] flex items-center justify-center">
               <img
                 src="/tana-river-logo.png"
                 alt="Tana River County"

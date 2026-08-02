@@ -394,6 +394,276 @@ export const DeleteSupplierResponse = zod.object({
 
 
 /**
+ * @summary List departments
+ */
+export const ListDepartmentsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+export const ListDepartmentsResponse = zod.array(ListDepartmentsResponseItem)
+
+
+/**
+ * @summary Create department
+ */
+export const CreateDepartmentBody = zod.object({
+  "name": zod.string(),
+  "description": zod.string().optional()
+})
+
+export const CreateDepartmentResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Get department
+ */
+export const GetDepartmentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetDepartmentResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Update department
+ */
+export const UpdateDepartmentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateDepartmentBody = zod.object({
+  "name": zod.string().optional(),
+  "description": zod.string().optional(),
+  "isActive": zod.boolean().optional()
+})
+
+export const UpdateDepartmentResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Deactivate department
+ */
+export const DeleteDepartmentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteDepartmentResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary List units
+ */
+export const ListUnitsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "abbreviation": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+export const ListUnitsResponse = zod.array(ListUnitsResponseItem)
+
+
+/**
+ * @summary Create unit
+ */
+export const CreateUnitBody = zod.object({
+  "name": zod.string(),
+  "abbreviation": zod.string().optional(),
+  "description": zod.string().optional()
+})
+
+export const CreateUnitResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "abbreviation": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Get unit
+ */
+export const GetUnitParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetUnitResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "abbreviation": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Update unit
+ */
+export const UpdateUnitParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateUnitBody = zod.object({
+  "name": zod.string().optional(),
+  "abbreviation": zod.string().optional(),
+  "description": zod.string().optional(),
+  "isActive": zod.boolean().optional()
+})
+
+export const UpdateUnitResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "abbreviation": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Deactivate unit
+ */
+export const DeleteUnitParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteUnitResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary List stores
+ */
+export const ListStoresResponseItem = zod.object({
+  "id": zod.number(),
+  "storeCode": zod.string(),
+  "name": zod.string(),
+  "location": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+export const ListStoresResponse = zod.array(ListStoresResponseItem)
+
+
+/**
+ * @summary Create store
+ */
+export const CreateStoreBody = zod.object({
+  "storeCode": zod.string(),
+  "name": zod.string(),
+  "location": zod.string().optional(),
+  "description": zod.string().optional()
+})
+
+export const CreateStoreResponse = zod.object({
+  "id": zod.number(),
+  "storeCode": zod.string(),
+  "name": zod.string(),
+  "location": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Get store
+ */
+export const GetStoreParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetStoreResponse = zod.object({
+  "id": zod.number(),
+  "storeCode": zod.string(),
+  "name": zod.string(),
+  "location": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Update store
+ */
+export const UpdateStoreParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateStoreBody = zod.object({
+  "storeCode": zod.string().optional(),
+  "name": zod.string().optional(),
+  "location": zod.string().optional(),
+  "description": zod.string().optional(),
+  "isActive": zod.boolean().optional()
+})
+
+export const UpdateStoreResponse = zod.object({
+  "id": zod.number(),
+  "storeCode": zod.string(),
+  "name": zod.string(),
+  "location": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Deactivate store
+ */
+export const DeleteStoreParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteStoreResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
  * @summary List inventory items
  */
 export const ListInventoryItemsQueryParams = zod.object({
@@ -431,7 +701,7 @@ export const ListInventoryItemsResponse = zod.array(ListInventoryItemsResponseIt
  * @summary Create inventory item
  */
 export const CreateInventoryItemBody = zod.object({
-  "itemCode": zod.string(),
+  "itemCode": zod.string().optional(),
   "barcodeQr": zod.string().optional(),
   "itemName": zod.string(),
   "categoryId": zod.number(),

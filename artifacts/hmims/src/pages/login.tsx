@@ -72,7 +72,7 @@ export default function Login() {
   return (
     <div className="min-h-screen grid md:grid-cols-[1.1fr_0.9fr] bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(135deg,_hsl(var(--background))_0%,_hsl(var(--muted))_100%)]">
       {/* Left Panel - Branding */}
-      <div className="hidden md:flex flex-col justify-between bg-gradient-to-br from-primary via-primary to-[hsl(var(--chart-2))] p-12 text-primary-foreground relative overflow-hidden">
+      <div className="hidden md:flex flex-col justify-center gap-10 bg-gradient-to-br from-primary via-primary to-[hsl(var(--chart-2))] p-10 text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.05),transparent_50%)]" />
         
@@ -80,13 +80,13 @@ export default function Login() {
           <img
             src="/tana-river-logo.png"
             alt="County Government of Tana River"
-            className="mx-auto w-[240px] h-[240px] object-contain mb-10 drop-shadow-2xl"
+            className="mx-auto w-[400px] h-[400px] object-contain mb-6 drop-shadow-2xl"
           />
-          <h1 className="text-5xl font-extrabold tracking-tight mb-6 drop-shadow-lg">HMIMS</h1>
+          <h1 className="text-5xl font-extrabold tracking-tight mb-3 drop-shadow-lg">HMIMS</h1>
           <p className="text-base uppercase font-semibold tracking-[0.24em] text-amber-200 mb-2">
             Enterprise Inventory System
           </p>
-          <p className="text-xl text-white font-semibold mb-4">
+          <p className="text-xl text-white font-semibold mb-2">
             Hola Municipality
           </p>
           <p className="text-lg text-primary-foreground/80 max-w-md leading-relaxed">
@@ -94,7 +94,7 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="relative z-10 space-y-3 text-primary-foreground/80">
+        <div className="relative z-10 space-y-2 text-primary-foreground/80">
           <div className="flex items-center gap-3">
             <div className="w-1 h-12 bg-accent rounded-full" />
             <div>
@@ -106,7 +106,7 @@ export default function Login() {
             <p className="text-xs text-primary-foreground/60">
               Government of Kenya • Authorized Personnel Only
             </p>
-            <p className="text-xs text-primary-foreground/40 mt-3">
+            <p className="text-xs text-primary-foreground/40 mt-2">
               © Copyright 2026 Tana River County Government
             </p>
           </div>

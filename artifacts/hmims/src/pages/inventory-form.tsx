@@ -15,7 +15,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const itemSchema = z.object({
-  itemCode: z.string().min(1, "Item code is required"),
+  itemCode: z.string().optional(),
   itemName: z.string().min(1, "Item name is required"),
   categoryId: z.coerce.number().min(1, "Category is required"),
   description: z.string().optional(),
@@ -73,15 +73,20 @@ export default function InventoryForm() {
   }, [item, isNew, form]);
 
   const onSubmit = (values: z.infer<typeof itemSchema>) => {
+    const payload = {
+      ...values,
+      itemCode: values.itemCode?.trim() || undefined,
+    };
+
     if (isNew) {
-      createMutation.mutate({ data: values }, {
+      createMutation.mutate({ data: payload }, {
         onSuccess: () => {
           toast({ title: "Item created successfully" });
           setLocation("/inventory");
         }
       });
     } else {
-      updateMutation.mutate({ id: Number(id), data: values }, {
+      updateMutation.mutate({ id: Number(id), data: payload }, {
         onSuccess: () => {
           toast({ title: "Item updated successfully" });
           setLocation("/inventory");
@@ -116,7 +121,13 @@ export default function InventoryForm() {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField control={form.control} name="itemCode" render={({ field }) => (
-                <FormItem><FormLabel>Item Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem>
+                  <FormLabel>Item Code</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Leave blank to auto-generate" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )} />
               <FormField control={form.control} name="itemName" render={({ field }) => (
                 <FormItem><FormLabel>Item Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>

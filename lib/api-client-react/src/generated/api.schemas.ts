@@ -190,6 +190,80 @@ export interface SupplierUpdate {
   isActive?: boolean;
 }
 
+export interface Department {
+  id: number;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface DepartmentInput {
+  name: string;
+  description?: string;
+}
+
+export interface DepartmentUpdate {
+  name?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export interface Unit {
+  id: number;
+  name: string;
+  /** @nullable */
+  abbreviation?: string | null;
+  /** @nullable */
+  description?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface UnitInput {
+  name: string;
+  abbreviation?: string;
+  description?: string;
+}
+
+export interface UnitUpdate {
+  name?: string;
+  abbreviation?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export interface Store {
+  id: number;
+  storeCode: string;
+  name: string;
+  /** @nullable */
+  location?: string | null;
+  /** @nullable */
+  description?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface StoreInput {
+  storeCode: string;
+  name: string;
+  location?: string;
+  description?: string;
+}
+
+export interface StoreUpdate {
+  storeCode?: string;
+  name?: string;
+  location?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
 export type InventoryItemStatus = typeof InventoryItemStatus[keyof typeof InventoryItemStatus];
 
 
@@ -231,7 +305,7 @@ export interface InventoryItem {
 }
 
 export interface InventoryItemInput {
-  itemCode: string;
+  itemCode?: string;
   barcodeQr?: string;
   itemName: string;
   categoryId: number;

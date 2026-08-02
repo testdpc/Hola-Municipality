@@ -15,6 +15,9 @@ import InventoryList from '@/pages/inventory';
 import InventoryForm from '@/pages/inventory-form';
 import Categories from '@/pages/categories';
 import Suppliers from '@/pages/suppliers';
+import Departments from '@/pages/departments';
+import Units from '@/pages/units';
+import Stores from '@/pages/stores';
 import Users from '@/pages/users';
 import PurchaseOrders from '@/pages/purchase-orders';
 import PurchaseOrderForm from '@/pages/purchase-order-form';
@@ -58,6 +61,9 @@ function Router() {
       <Route path="/inventory/:id"><ProtectedRoute component={InventoryForm} /></Route>
       <Route path="/categories"><ProtectedRoute component={Categories} /></Route>
       <Route path="/suppliers"><ProtectedRoute component={Suppliers} /></Route>
+      <Route path="/departments"><ProtectedRoute component={Departments} /></Route>
+      <Route path="/units"><ProtectedRoute component={Units} /></Route>
+      <Route path="/stores"><ProtectedRoute component={Stores} /></Route>
 
       {/* Procurement */}
       <Route path="/purchase-orders"><ProtectedRoute component={PurchaseOrders} /></Route>

@@ -7,7 +7,7 @@
  */
 
 export interface InventoryItemInput {
-  itemCode: string;
+  itemCode?: string;
   barcodeQr?: string;
   itemName: string;
   categoryId: number;
