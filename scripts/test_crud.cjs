@@ -13,6 +13,10 @@ async function login(){
   return request('/auth/login', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ username: 'admin', password: 'admin1234' }) });
 }
 
+function makeTag() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 async function run(){
   console.log('Logging in...');
   const loginRes = await login();
@@ -26,14 +30,15 @@ async function run(){
   const deps = await request('/departments', { headers: auth });
   console.log('GET /departments ->', deps.status, Array.isArray(deps.body) ? deps.body.length : deps.body);
 
-  const createDep = await request('/departments', { method: 'POST', headers: auth, body: JSON.stringify({ name: 'TestDeptX', description: 'Created by test' }) });
+  const depTag = makeTag();
+  const createDep = await request('/departments', { method: 'POST', headers: auth, body: JSON.stringify({ name: `TestDeptX-${depTag}`, description: 'Created by test' }) });
   console.log('POST /departments ->', createDep.status, createDep.body);
   const depId = createDep.body && createDep.body.id;
 
   const getDep = await request(`/departments/${depId}`, { headers: auth });
   console.log('GET /departments/:id ->', getDep.status, getDep.body);
 
-  const patchDep = await request(`/departments/${depId}`, { method: 'PATCH', headers: auth, body: JSON.stringify({ name: 'TestDeptXUpdated' }) });
+  const patchDep = await request(`/departments/${depId}`, { method: 'PATCH', headers: auth, body: JSON.stringify({ name: `TestDeptXUpdated-${depTag}` }) });
   console.log('PATCH /departments/:id ->', patchDep.status, patchDep.body);
 
   const delDep = await request(`/departments/${depId}`, { method: 'DELETE', headers: auth });
@@ -44,14 +49,15 @@ async function run(){
   const cats = await request('/categories', { headers: auth });
   console.log('GET /categories ->', cats.status, Array.isArray(cats.body) ? cats.body.length : cats.body);
 
-  const createCat = await request('/categories', { method: 'POST', headers: auth, body: JSON.stringify({ name: 'TestCatX', description: 'Created by test' }) });
+  const catTag = makeTag();
+  const createCat = await request('/categories', { method: 'POST', headers: auth, body: JSON.stringify({ name: `TestCatX-${catTag}`, description: 'Created by test' }) });
   console.log('POST /categories ->', createCat.status, createCat.body);
   const catId = createCat.body && createCat.body.id;
 
   const getCat = await request(`/categories/${catId}`, { headers: auth });
   console.log('GET /categories/:id ->', getCat.status, getCat.body);
 
-  const patchCat = await request(`/categories/${catId}`, { method: 'PATCH', headers: auth, body: JSON.stringify({ name: 'TestCatXUpdated' }) });
+  const patchCat = await request(`/categories/${catId}`, { method: 'PATCH', headers: auth, body: JSON.stringify({ name: `TestCatXUpdated-${catTag}` }) });
   console.log('PATCH /categories/:id ->', patchCat.status, patchCat.body);
 
   const delCat = await request(`/categories/${catId}`, { method: 'DELETE', headers: auth });
@@ -62,14 +68,15 @@ async function run(){
   const units = await request('/units', { headers: auth });
   console.log('GET /units ->', units.status, Array.isArray(units.body) ? units.body.length : units.body);
 
-  const createUnit = await request('/units', { method: 'POST', headers: auth, body: JSON.stringify({ name: 'TestUnitX', abbreviation: 'tx', description: 'Created by test' }) });
+  const unitTag = makeTag();
+  const createUnit = await request('/units', { method: 'POST', headers: auth, body: JSON.stringify({ name: `TestUnitX-${unitTag}`, abbreviation: 'tx', description: 'Created by test' }) });
   console.log('POST /units ->', createUnit.status, createUnit.body);
   const unitId = createUnit.body && createUnit.body.id;
 
   const getUnit = await request(`/units/${unitId}`, { headers: auth });
   console.log('GET /units/:id ->', getUnit.status, getUnit.body);
 
-  const patchUnit = await request(`/units/${unitId}`, { method: 'PATCH', headers: auth, body: JSON.stringify({ name: 'TestUnitXUpdated' }) });
+  const patchUnit = await request(`/units/${unitId}`, { method: 'PATCH', headers: auth, body: JSON.stringify({ name: `TestUnitXUpdated-${unitTag}` }) });
   console.log('PATCH /units/:id ->', patchUnit.status, patchUnit.body);
 
   const delUnit = await request(`/units/${unitId}`, { method: 'DELETE', headers: auth });
@@ -80,14 +87,15 @@ async function run(){
   const stores = await request('/stores', { headers: auth });
   console.log('GET /stores ->', stores.status, Array.isArray(stores.body) ? stores.body.length : stores.body);
 
-  const createStore = await request('/stores', { method: 'POST', headers: auth, body: JSON.stringify({ storeCode: 'TST1', name: 'Test Store 1', location: 'Test', description: 'Created by test' }) });
+  const storeTag = makeTag();
+  const createStore = await request('/stores', { method: 'POST', headers: auth, body: JSON.stringify({ storeCode: `TST1-${storeTag}`, name: `Test Store 1-${storeTag}`, location: 'Test', description: 'Created by test' }) });
   console.log('POST /stores ->', createStore.status, createStore.body);
   const storeId = createStore.body && createStore.body.id;
 
   const getStore = await request(`/stores/${storeId}`, { headers: auth });
   console.log('GET /stores/:id ->', getStore.status, getStore.body);
 
-  const patchStore = await request(`/stores/${storeId}`, { method: 'PATCH', headers: auth, body: JSON.stringify({ name: 'Test Store 1 Updated' }) });
+  const patchStore = await request(`/stores/${storeId}`, { method: 'PATCH', headers: auth, body: JSON.stringify({ name: `Test Store 1 Updated-${storeTag}` }) });
   console.log('PATCH /stores/:id ->', patchStore.status, patchStore.body);
 
   const delStore = await request(`/stores/${storeId}`, { method: 'DELETE', headers: auth });
