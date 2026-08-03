@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { db, suppliersTable } from "@workspace/db";
+import { db, suppliersTable, inventoryItemsTable, goodsReceivedNotesTable, purchaseOrdersTable } from "@workspace/db";
 import { requireAuth } from "../lib/auth";
 import { createAuditLog } from "../lib/audit";
 
@@ -61,10 +61,19 @@ router.patch("/suppliers/:id", requireAuth, async (req, res): Promise<void> => {
 
 router.delete("/suppliers/:id", requireAuth, async (req, res): Promise<void> => {
   const id = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id, 10);
-  const [sup] = await db.update(suppliersTable).set({ isActive: false }).where(eq(suppliersTable.id, id)).returning();
+  const [referencedInventoryItem] = await db.select({ id: inventoryItemsTable.id }).from(inventoryItemsTable).where(eq(inventoryItemsTable.supplierId, id)).limit(1);
+  const [referencedGRN] = await db.select({ id: goodsReceivedNotesTable.id }).from(goodsReceivedNotesTable).where(eq(goodsReceivedNotesTable.supplierId, id)).limit(1);
+  const [referencedPurchaseOrder] = await db.select({ id: purchaseOrdersTable.id }).from(purchaseOrdersTable).where(eq(purchaseOrdersTable.supplierId, id)).limit(1);
+
+  if (referencedInventoryItem || referencedGRN || referencedPurchaseOrder) {
+    res.status(409).json({ error: "Cannot delete because this record is currently in use." });
+    return;
+  }
+
+  const [sup] = await db.delete(suppliersTable).where(eq(suppliersTable.id, id)).returning();
   if (!sup) { res.status(404).json({ error: "Supplier not found" }); return; }
   await createAuditLog(req.user!, "DELETE", "suppliers", id);
-  res.json({ message: "Supplier deactivated" });
+  res.json({ message: "Supplier deleted" });
 });
 
 export default router;

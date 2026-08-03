@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit2, Trash2, Search } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
@@ -33,6 +34,8 @@ export default function Stores() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [blockedDeleteMessage, setBlockedDeleteMessage] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -88,15 +91,22 @@ export default function Stores() {
     }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Deactivate this store?")) {
-      deleteMutation.mutate({ id }, {
-        onSuccess: () => {
-          toast({ title: "Store deactivated" });
-          refetch();
-        },
-      });
-    }
+  const handleDelete = () => {
+    if (pendingDeleteId === null) return;
+
+    deleteMutation.mutate({ id: pendingDeleteId }, {
+      onSuccess: () => {
+        toast({ title: "Store deleted" });
+        setPendingDeleteId(null);
+        setBlockedDeleteMessage(null);
+        refetch();
+      },
+      onError: (error) => {
+        const message = error instanceof Error ? error.message : "Unable to delete store right now.";
+        setBlockedDeleteMessage(message);
+        setPendingDeleteId(null);
+      },
+    });
   };
 
   return (
@@ -110,6 +120,31 @@ export default function Stores() {
           <Plus className="h-4 w-4" /> Add Store
         </Button>
       </div>
+
+      <AlertDialog open={pendingDeleteId !== null} onOpenChange={(open) => { if (!open) { setPendingDeleteId(null); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Store</AlertDialogTitle>
+            <AlertDialogDescription>This action permanently deletes the store and cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={blockedDeleteMessage !== null} onOpenChange={(open) => !open && setBlockedDeleteMessage(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unable to delete store</AlertDialogTitle>
+            <AlertDialogDescription>{blockedDeleteMessage}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setBlockedDeleteMessage(null)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-2xl">
@@ -207,11 +242,9 @@ export default function Stores() {
                       </TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(store)}><Edit2 className="h-4 w-4" /></Button>
-                        {store.isActive && (
-                          <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(store.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <Button variant="outline" size="sm" className="border-red-200 text-red-700 hover:bg-red-50" onClick={() => setPendingDeleteId(store.id)}>
+                          <Trash2 className="mr-2 h-4 w-4" /> Delete
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))

@@ -21,11 +21,6 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-const DEFAULT_ADMIN_CREDENTIALS = {
-  username: "admin",
-  password: "admin1234",
-};
-
 export default function Login() {
   const [, setLocation] = useLocation();
   const loginMutation = useLogin();
@@ -40,23 +35,11 @@ export default function Login() {
   });
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    const isDefaultAdminLogin =
-      values.username.toLowerCase() === DEFAULT_ADMIN_CREDENTIALS.username &&
-      values.password === DEFAULT_ADMIN_CREDENTIALS.password;
-
-    if (isDefaultAdminLogin) {
-      localStorage.setItem("hmims_token", "demo-admin-token");
-      toast({
-        title: "Signed in",
-        description: "Using the default admin account.",
-      });
-      setLocation("/dashboard");
-      return;
-    }
-
     loginMutation.mutate({ data: values }, {
       onSuccess: (res) => {
-        localStorage.setItem("hmims_token", res.token);
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("hmims_token", res.token);
+        }
         setLocation("/dashboard");
       },
       onError: () => {

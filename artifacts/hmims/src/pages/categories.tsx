@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Edit2, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -27,6 +28,8 @@ export default function Categories() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [blockedDeleteMessage, setBlockedDeleteMessage] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -65,15 +68,21 @@ export default function Categories() {
     }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this category?")) {
-      deleteMutation.mutate({ id }, {
-        onSuccess: () => {
-          toast({ title: "Category deleted" });
-          refetch();
-        }
-      });
-    }
+  const handleDelete = () => {
+    if (pendingDeleteId === null) return;
+    deleteMutation.mutate({ id: pendingDeleteId }, {
+      onSuccess: () => {
+        toast({ title: "Category deleted" });
+        setPendingDeleteId(null);
+        setBlockedDeleteMessage(null);
+        refetch();
+      },
+      onError: (error) => {
+        const message = error instanceof Error ? error.message : "Unable to delete category right now.";
+        setBlockedDeleteMessage(message);
+        setPendingDeleteId(null);
+      },
+    });
   };
 
   return (
@@ -87,6 +96,31 @@ export default function Categories() {
           <Plus className="h-4 w-4" /> Add Category
         </Button>
       </div>
+
+      <AlertDialog open={pendingDeleteId !== null} onOpenChange={(open) => !open && setPendingDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Category</AlertDialogTitle>
+            <AlertDialogDescription>This action permanently deletes the category and cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={blockedDeleteMessage !== null} onOpenChange={(open) => !open && setBlockedDeleteMessage(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unable to delete category</AlertDialogTitle>
+            <AlertDialogDescription>{blockedDeleteMessage}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setBlockedDeleteMessage(null)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
@@ -134,7 +168,7 @@ export default function Categories() {
                     <TableCell>{format(new Date(cat.createdAt), "MMM d, yyyy")}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" onClick={() => openEdit(cat)}><Edit2 className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(cat.id)}>
+                      <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => setPendingDeleteId(cat.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>

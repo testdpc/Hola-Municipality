@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and, sql } from "drizzle-orm";
-import { db, departmentsTable } from "@workspace/db";
+import { db, departmentsTable, inventoryItemsTable } from "@workspace/db";
 import { requireAuth } from "../lib/auth";
 import { createAuditLog } from "../lib/audit";
 
@@ -80,13 +80,19 @@ router.patch("/departments/:id", requireAuth, async (req, res): Promise<void> =>
 
 router.delete("/departments/:id", requireAuth, async (req, res): Promise<void> => {
   const id = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id, 10);
-  const [department] = await db.update(departmentsTable).set({ isActive: false }).where(eq(departmentsTable.id, id)).returning();
+  const [referencedItem] = await db.select({ id: inventoryItemsTable.id }).from(inventoryItemsTable).where(eq(inventoryItemsTable.departmentId, id)).limit(1);
+  if (referencedItem) {
+    res.status(409).json({ error: "Cannot delete because this record is currently in use." });
+    return;
+  }
+
+  const [department] = await db.delete(departmentsTable).where(eq(departmentsTable.id, id)).returning();
   if (!department) {
     res.status(404).json({ error: "Department not found" });
     return;
   }
   await createAuditLog(req.user!, "DELETE", "departments", id);
-  res.json({ message: "Department deactivated" });
+  res.json({ message: "Department deleted" });
 });
 
 export default router;

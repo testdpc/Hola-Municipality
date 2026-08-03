@@ -19,7 +19,14 @@ export interface InventoryItemUpdate {
   reorderLevel?: number;
   shelfBinLocation?: string;
   purchasePrice?: number;
+  purchaseCost?: number;
   supplierId?: number;
+  departmentId?: number;
+  storeId?: number;
+  procurementOfficerId?: number;
+  quantityReceived?: number;
+  quantityAvailable?: number;
+  purchaseDate?: string;
   dateReceived?: string;
   expiryDate?: string;
 }

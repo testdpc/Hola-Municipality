@@ -82,13 +82,13 @@ router.patch("/units/:id", requireAuth, async (req, res): Promise<void> => {
 
 router.delete("/units/:id", requireAuth, async (req, res): Promise<void> => {
   const id = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id, 10);
-  const [unit] = await db.update(unitsTable).set({ isActive: false }).where(eq(unitsTable.id, id)).returning();
+  const [unit] = await db.delete(unitsTable).where(eq(unitsTable.id, id)).returning();
   if (!unit) {
     res.status(404).json({ error: "Unit not found" });
     return;
   }
   await createAuditLog(req.user!, "DELETE", "units", id);
-  res.json({ message: "Unit deactivated" });
+  res.json({ message: "Unit deleted" });
 });
 
 export default router;

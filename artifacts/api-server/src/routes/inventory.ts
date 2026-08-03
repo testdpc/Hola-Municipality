@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { eq, and, like, lte, sql } from "drizzle-orm";
-import { db, inventoryItemsTable, categoriesTable, suppliersTable } from "@workspace/db";
+import { eq, and, sql } from "drizzle-orm";
+import { db, inventoryItemsTable, categoriesTable, suppliersTable, departmentsTable, storesTable, usersTable } from "@workspace/db";
 import { requireAuth } from "../lib/auth";
 import { createAuditLog } from "../lib/audit";
 
@@ -12,29 +12,16 @@ function computeStatus(current: number, min: number): string {
   return "available";
 }
 
-function sanitizeItemCode(value: string): string {
-  const normalized = value
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-+/g, "-")
-    .slice(0, 20);
-  return normalized || "ITEM";
-}
-
-async function generateItemCode(itemName: string) {
-  const base = sanitizeItemCode(itemName);
-  let candidate = base;
-  let count = 1;
+async function generateItemCode() {
+  let nextNumber = 1;
 
   while (true) {
-    const [exists] = await db.select().from(inventoryItemsTable).where(eq(inventoryItemsTable.itemCode, candidate));
+    const candidate = `${String(nextNumber).padStart(7, "0")}`;
+    const [exists] = await db.select({ id: inventoryItemsTable.id }).from(inventoryItemsTable).where(eq(inventoryItemsTable.itemCode, candidate)).limit(1);
     if (!exists) {
       return candidate;
     }
-    candidate = `${base}-${String(count).padStart(3, "0")}`;
-    count += 1;
+    nextNumber += 1;
   }
 }
 
@@ -45,6 +32,17 @@ async function formatItem(item: typeof inventoryItemsTable.$inferSelect) {
   const [sup] = item.supplierId
     ? await db.select({ name: suppliersTable.name }).from(suppliersTable).where(eq(suppliersTable.id, item.supplierId))
     : [null];
+  const [dept] = item.departmentId
+    ? await db.select({ name: departmentsTable.name }).from(departmentsTable).where(eq(departmentsTable.id, item.departmentId))
+    : [null];
+  const [store] = item.storeId
+    ? await db.select({ name: storesTable.name }).from(storesTable).where(eq(storesTable.id, item.storeId))
+    : [null];
+  const [procurementOfficer] = item.procurementOfficerId
+    ? await db.select({ fullName: usersTable.fullName }).from(usersTable).where(eq(usersTable.id, item.procurementOfficerId))
+    : [null];
+
+  const purchaseCost = Number(item.purchasePrice ?? 0);
   return {
     id: item.id,
     itemCode: item.itemCode,
@@ -54,15 +52,27 @@ async function formatItem(item: typeof inventoryItemsTable.$inferSelect) {
     categoryName: cat?.name || null,
     description: item.description,
     unitOfMeasure: item.unitOfMeasure,
-    currentQuantity: item.currentQuantity,
+    currentQuantity: item.quantityAvailable ?? item.currentQuantity,
     minimumStock: item.minimumStock,
     maximumStock: item.maximumStock,
     reorderLevel: item.reorderLevel,
     shelfBinLocation: item.shelfBinLocation,
-    purchasePrice: parseFloat(item.purchasePrice),
+    purchasePrice: purchaseCost,
+    purchaseCost,
     supplierId: item.supplierId,
     supplierName: sup?.name || null,
-    dateReceived: item.dateReceived,
+    departmentId: item.departmentId,
+    departmentName: dept?.name || null,
+    storeId: item.storeId,
+    storeName: store?.name || null,
+    procurementOfficerId: item.procurementOfficerId,
+    procurementOfficerName: item.procurementOfficerName ?? (procurementOfficer?.fullName || null),
+    procurementOfficerPhone: item.procurementOfficerPhone,
+    procurementOfficerEmail: item.procurementOfficerEmail,
+    quantityReceived: item.quantityReceived,
+    quantityAvailable: item.quantityAvailable ?? item.currentQuantity,
+    purchaseDate: item.purchaseDate,
+    dateReceived: item.dateReceived ?? item.purchaseDate,
     expiryDate: item.expiryDate,
     status: item.status,
     createdAt: item.createdAt.toISOString(),
@@ -109,24 +119,51 @@ router.get("/inventory/expiring", requireAuth, async (_req, res): Promise<void> 
 });
 
 router.post("/inventory", requireAuth, async (req, res): Promise<void> => {
-  const { itemCode, barcodeQr, itemName, categoryId, description, unitOfMeasure, currentQuantity, minimumStock, maximumStock, reorderLevel, shelfBinLocation, purchasePrice, supplierId, dateReceived, expiryDate } = req.body;
+  const {
+    itemCode,
+    barcodeQr,
+    itemName,
+    categoryId,
+    description,
+    unitOfMeasure,
+    currentQuantity,
+    minimumStock,
+    maximumStock,
+    reorderLevel,
+    shelfBinLocation,
+    purchasePrice,
+    purchaseCost,
+    supplierId,
+    departmentId,
+    storeId,
+    procurementOfficerId,
+    procurementOfficerName,
+    procurementOfficerPhone,
+    procurementOfficerEmail,
+    quantityReceived,
+    quantityAvailable,
+    purchaseDate,
+    dateReceived,
+    expiryDate,
+  } = req.body;
   if (!itemName || !categoryId || !unitOfMeasure) {
     res.status(400).json({ error: "itemName, categoryId, and unitOfMeasure are required" });
     return;
   }
 
-  const normalizedItemCode = itemCode ? sanitizeItemCode(String(itemCode)) : await generateItemCode(itemName);
-  if (itemCode) {
-    const [existingItemCode] = await db.select().from(inventoryItemsTable).where(eq(inventoryItemsTable.itemCode, normalizedItemCode));
-    if (existingItemCode) {
-      res.status(409).json({ error: "Item code already exists" });
-      return;
-    }
-  }
+  const normalizedItemCode = await generateItemCode();
 
-  const qty = currentQuantity ?? 0;
-  const minStock = minimumStock ?? 0;
-  const status = computeStatus(qty, minStock);
+  const quantityAvailableValue = Number(quantityAvailable ?? currentQuantity ?? 0);
+  const procurementOfficerNameValue = typeof procurementOfficerName === "string" ? procurementOfficerName.trim() : null;
+  const procurementOfficerPhoneValue = typeof procurementOfficerPhone === "string" ? procurementOfficerPhone.trim() || null : null;
+  const procurementOfficerEmailValue = typeof procurementOfficerEmail === "string" ? procurementOfficerEmail.trim() || null : null;
+  const quantityReceivedValue = Number(quantityReceived ?? quantityAvailableValue);
+  const minStock = Number(minimumStock ?? 0);
+  const maxStock = maximumStock === undefined || maximumStock === null || maximumStock === "" ? null : Number(maximumStock);
+  const reorderLevelValue = reorderLevel === undefined || reorderLevel === null || reorderLevel === "" ? null : Number(reorderLevel);
+  const shelfBinLoc = typeof shelfBinLocation === "string" ? shelfBinLocation.trim() : shelfBinLocation;
+  const status = computeStatus(quantityAvailableValue, minStock);
+  const purchaseCostValue = Number(purchaseCost ?? purchasePrice ?? 0);
 
   const [item] = await db.insert(inventoryItemsTable).values({
     itemCode: normalizedItemCode,
@@ -135,14 +172,23 @@ router.post("/inventory", requireAuth, async (req, res): Promise<void> => {
     categoryId: Number(categoryId),
     description,
     unitOfMeasure,
-    currentQuantity: Number(qty),
-    minimumStock: Number(minStock),
-    maximumStock: Number(maximumStock ?? 1000),
-    reorderLevel: Number(reorderLevel ?? 10),
-    shelfBinLocation,
-    purchasePrice: String(purchasePrice ?? 0),
+    currentQuantity: quantityAvailableValue,
+    minimumStock: minStock,
+    maximumStock: maxStock ?? 1000,
+    reorderLevel: reorderLevelValue ?? 10,
+    shelfBinLocation: shelfBinLoc || null,
+    purchasePrice: String(purchaseCostValue),
     supplierId: supplierId ? Number(supplierId) : null,
-    dateReceived,
+    departmentId: departmentId ? Number(departmentId) : null,
+    storeId: storeId ? Number(storeId) : null,
+    procurementOfficerId: procurementOfficerId ? Number(procurementOfficerId) : null,
+    procurementOfficerName: procurementOfficerNameValue,
+    procurementOfficerPhone: procurementOfficerPhoneValue,
+    procurementOfficerEmail: procurementOfficerEmailValue,
+    quantityReceived: quantityReceivedValue,
+    quantityAvailable: quantityAvailableValue,
+    purchaseDate,
+    dateReceived: dateReceived ?? purchaseDate,
     expiryDate,
     status,
   }).returning();
@@ -160,38 +206,67 @@ router.get("/inventory/:id", requireAuth, async (req, res): Promise<void> => {
 router.patch("/inventory/:id", requireAuth, async (req, res): Promise<void> => {
   const id = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id, 10);
   const updates: Record<string, unknown> = {};
-  const fields = ["itemCode","barcodeQr","itemName","categoryId","description","unitOfMeasure","currentQuantity","minimumStock","maximumStock","reorderLevel","shelfBinLocation","purchasePrice","supplierId","dateReceived","expiryDate"];
+  const fields = [
+    "itemCode",
+    "barcodeQr",
+    "itemName",
+    "categoryId",
+    "description",
+    "unitOfMeasure",
+    "currentQuantity",
+    "minimumStock",
+    "maximumStock",
+    "reorderLevel",
+    "shelfBinLocation",
+    "purchasePrice",
+    "purchaseCost",
+    "supplierId",
+    "departmentId",
+    "storeId",
+    "procurementOfficerId",
+    "procurementOfficerName",
+    "procurementOfficerPhone",
+    "procurementOfficerEmail",
+    "quantityReceived",
+    "quantityAvailable",
+    "purchaseDate",
+    "dateReceived",
+    "expiryDate",
+  ];
   for (const f of fields) {
     if (req.body[f] !== undefined) updates[f] = req.body[f];
   }
 
-  if (updates.itemCode !== undefined) {
-    const candidate = String(updates.itemCode).trim();
-    if (!candidate) {
-      res.status(400).json({ error: "Item code cannot be empty" });
-      return;
-    }
-    const normalizedCode = sanitizeItemCode(candidate);
-    const [existingCode] = await db
-      .select()
-      .from(inventoryItemsTable)
-      .where(and(eq(inventoryItemsTable.itemCode, normalizedCode), sql`${inventoryItemsTable.id} != ${id}`));
-    if (existingCode) {
-      res.status(409).json({ error: "Item code already exists" });
-      return;
-    }
-    updates.itemCode = normalizedCode;
-  }
+  if (updates.itemCode !== undefined) delete updates.itemCode;
 
   if (updates.categoryId !== undefined) updates.categoryId = Number(updates.categoryId);
   if (updates.supplierId !== undefined) updates.supplierId = updates.supplierId !== null ? Number(updates.supplierId) : null;
-  if (updates.purchasePrice !== undefined) updates.purchasePrice = String(updates.purchasePrice);
+  if (updates.departmentId !== undefined) updates.departmentId = updates.departmentId !== null ? Number(updates.departmentId) : null;
+  if (updates.storeId !== undefined) updates.storeId = updates.storeId !== null ? Number(updates.storeId) : null;
+  if (updates.procurementOfficerId !== undefined) updates.procurementOfficerId = updates.procurementOfficerId !== null ? Number(updates.procurementOfficerId) : null;
+  if (updates.procurementOfficerName !== undefined) updates.procurementOfficerName = updates.procurementOfficerName === null || updates.procurementOfficerName === "" ? null : String(updates.procurementOfficerName);
+  if (updates.procurementOfficerPhone !== undefined) updates.procurementOfficerPhone = updates.procurementOfficerPhone === null || updates.procurementOfficerPhone === "" ? null : String(updates.procurementOfficerPhone);
+  if (updates.procurementOfficerEmail !== undefined) updates.procurementOfficerEmail = updates.procurementOfficerEmail === null || updates.procurementOfficerEmail === "" ? null : String(updates.procurementOfficerEmail);
+  if (updates.purchasePrice !== undefined || updates.purchaseCost !== undefined) {
+    const purchaseCostValue = updates.purchaseCost !== undefined ? updates.purchaseCost : updates.purchasePrice;
+    updates.purchasePrice = String(purchaseCostValue);
+    delete updates.purchaseCost;
+  }
+  if (updates.maximumStock !== undefined) updates.maximumStock = updates.maximumStock === null || updates.maximumStock === "" ? null : Number(updates.maximumStock);
+  if (updates.reorderLevel !== undefined) updates.reorderLevel = updates.reorderLevel === null || updates.reorderLevel === "" ? null : Number(updates.reorderLevel);
+  if (updates.shelfBinLocation !== undefined) updates.shelfBinLocation = updates.shelfBinLocation === null || updates.shelfBinLocation === "" ? null : String(updates.shelfBinLocation);
+  if (updates.quantityReceived !== undefined) updates.quantityReceived = Number(updates.quantityReceived);
+  if (updates.quantityAvailable !== undefined) updates.quantityAvailable = Number(updates.quantityAvailable);
+  if (updates.purchaseDate !== undefined) updates.purchaseDate = updates.purchaseDate || null;
+  if (updates.dateReceived !== undefined) updates.dateReceived = updates.dateReceived || null;
 
-  // Recompute status
   const [existing] = await db.select().from(inventoryItemsTable).where(eq(inventoryItemsTable.id, id));
   if (!existing) { res.status(404).json({ error: "Item not found" }); return; }
-  const newQty = (updates.currentQuantity !== undefined ? Number(updates.currentQuantity) : existing.currentQuantity);
+  const newQty = (updates.currentQuantity !== undefined ? Number(updates.currentQuantity) : (updates.quantityAvailable !== undefined ? Number(updates.quantityAvailable) : (existing.quantityAvailable ?? existing.currentQuantity)));
   const newMin = (updates.minimumStock !== undefined ? Number(updates.minimumStock) : existing.minimumStock);
+  if (updates.quantityAvailable !== undefined && updates.currentQuantity === undefined) {
+    updates.currentQuantity = Number(updates.quantityAvailable);
+  }
   updates.status = computeStatus(newQty, newMin);
 
   const [item] = await db.update(inventoryItemsTable).set(updates).where(eq(inventoryItemsTable.id, id)).returning();

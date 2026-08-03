@@ -26,10 +26,27 @@ export interface InventoryItem {
   /** @nullable */
   shelfBinLocation?: string | null;
   purchasePrice: number;
+  purchaseCost: number;
   /** @nullable */
   supplierId?: number | null;
   /** @nullable */
   supplierName?: string | null;
+  /** @nullable */
+  departmentId?: number | null;
+  /** @nullable */
+  departmentName?: string | null;
+  /** @nullable */
+  storeId?: number | null;
+  /** @nullable */
+  storeName?: string | null;
+  /** @nullable */
+  procurementOfficerId?: number | null;
+  /** @nullable */
+  procurementOfficerName?: string | null;
+  quantityReceived: number;
+  quantityAvailable: number;
+  /** @nullable */
+  purchaseDate?: string | null;
   /** @nullable */
   dateReceived?: string | null;
   /** @nullable */

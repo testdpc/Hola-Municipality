@@ -292,10 +292,27 @@ export interface InventoryItem {
   /** @nullable */
   shelfBinLocation?: string | null;
   purchasePrice: number;
+  purchaseCost: number;
   /** @nullable */
   supplierId?: number | null;
   /** @nullable */
   supplierName?: string | null;
+  /** @nullable */
+  departmentId?: number | null;
+  /** @nullable */
+  departmentName?: string | null;
+  /** @nullable */
+  storeId?: number | null;
+  /** @nullable */
+  storeName?: string | null;
+  /** @nullable */
+  procurementOfficerId?: number | null;
+  /** @nullable */
+  procurementOfficerName?: string | null;
+  quantityReceived: number;
+  quantityAvailable: number;
+  /** @nullable */
+  purchaseDate?: string | null;
   /** @nullable */
   dateReceived?: string | null;
   /** @nullable */
@@ -313,11 +330,18 @@ export interface InventoryItemInput {
   unitOfMeasure: string;
   currentQuantity: number;
   minimumStock: number;
-  maximumStock: number;
-  reorderLevel: number;
+  maximumStock?: number;
+  reorderLevel?: number;
   shelfBinLocation?: string;
-  purchasePrice: number;
+  purchasePrice?: number;
+  purchaseCost?: number;
   supplierId?: number;
+  departmentId?: number;
+  storeId?: number;
+  procurementOfficerId?: number;
+  quantityReceived?: number;
+  quantityAvailable?: number;
+  purchaseDate?: string;
   dateReceived?: string;
   expiryDate?: string;
 }
@@ -335,7 +359,14 @@ export interface InventoryItemUpdate {
   reorderLevel?: number;
   shelfBinLocation?: string;
   purchasePrice?: number;
+  purchaseCost?: number;
   supplierId?: number;
+  departmentId?: number;
+  storeId?: number;
+  procurementOfficerId?: number;
+  quantityReceived?: number;
+  quantityAvailable?: number;
+  purchaseDate?: string;
   dateReceived?: string;
   expiryDate?: string;
 }

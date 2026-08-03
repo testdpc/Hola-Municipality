@@ -7,7 +7,13 @@ import { AppLayout } from '@/components/layout';
 import { setAuthTokenGetter } from '@workspace/api-client-react';
 
 // Attach the JWT from localStorage to every API request
-setAuthTokenGetter(() => localStorage.getItem('hmims_token'));
+setAuthTokenGetter(() => {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return null;
+  }
+
+  return window.localStorage.getItem('hmims_token');
+});
 
 import Login from '@/pages/login';
 import Dashboard from '@/pages/dashboard';

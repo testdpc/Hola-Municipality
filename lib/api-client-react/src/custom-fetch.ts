@@ -44,6 +44,29 @@ export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
 }
 
+function getStoredAuthToken(): string | null {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return null;
+  }
+
+  try {
+    return window.localStorage.getItem("hmims_token");
+  } catch {
+    return null;
+  }
+}
+
+async function resolveAuthToken(): Promise<string | null> {
+  if (_authTokenGetter) {
+    const token = await _authTokenGetter();
+    if (token) {
+      return token;
+    }
+  }
+
+  return getStoredAuthToken();
+}
+
 function isRequest(input: RequestInfo | URL): input is Request {
   return typeof Request !== "undefined" && input instanceof Request;
 }
@@ -349,10 +372,10 @@ export async function customFetch<T = unknown>(
     headers.set("accept", DEFAULT_JSON_ACCEPT);
   }
 
-  // Attach bearer token when an auth getter is configured and no
-  // Authorization header has been explicitly provided.
-  if (_authTokenGetter && !headers.has("authorization")) {
-    const token = await _authTokenGetter();
+  // Attach a bearer token when one is available and no Authorization header
+  // has been explicitly provided.
+  if (!headers.has("authorization")) {
+    const token = await resolveAuthToken();
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
     }

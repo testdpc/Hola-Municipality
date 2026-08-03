@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { db, categoriesTable } from "@workspace/db";
+import { db, categoriesTable, inventoryItemsTable } from "@workspace/db";
 import { requireAuth } from "../lib/auth";
 import { createAuditLog } from "../lib/audit";
 
@@ -40,7 +40,18 @@ router.patch("/categories/:id", requireAuth, async (req, res): Promise<void> => 
 
 router.delete("/categories/:id", requireAuth, async (req, res): Promise<void> => {
   const id = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id, 10);
-  await db.delete(categoriesTable).where(eq(categoriesTable.id, id));
+  const [referencedItem] = await db.select({ id: inventoryItemsTable.id }).from(inventoryItemsTable).where(eq(inventoryItemsTable.categoryId, id)).limit(1);
+  if (referencedItem) {
+    res.status(409).json({ error: "Cannot delete because this record is currently in use." });
+    return;
+  }
+
+  const [category] = await db.delete(categoriesTable).where(eq(categoriesTable.id, id)).returning();
+  if (!category) {
+    res.status(404).json({ error: "Category not found" });
+    return;
+  }
+
   await createAuditLog(req.user!, "DELETE", "categories", id);
   res.json({ message: "Category deleted" });
 });

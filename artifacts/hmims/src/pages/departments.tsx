@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit2, Trash2, Search } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
@@ -31,6 +32,8 @@ export default function Departments() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [blockedDeleteMessage, setBlockedDeleteMessage] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -84,15 +87,22 @@ export default function Departments() {
     }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Deactivate this department?")) {
-      deleteMutation.mutate({ id }, {
-        onSuccess: () => {
-          toast({ title: "Department deactivated" });
-          refetch();
-        },
-      });
-    }
+  const handleDelete = () => {
+    if (pendingDeleteId === null) return;
+
+    deleteMutation.mutate({ id: pendingDeleteId }, {
+      onSuccess: () => {
+        toast({ title: "Department deleted" });
+        setPendingDeleteId(null);
+        setBlockedDeleteMessage(null);
+        refetch();
+      },
+      onError: (error) => {
+        const message = error instanceof Error ? error.message : "Unable to delete department right now.";
+        setBlockedDeleteMessage(message);
+        setPendingDeleteId(null);
+      },
+    });
   };
 
   return (
@@ -106,6 +116,31 @@ export default function Departments() {
           <Plus className="h-4 w-4" /> Add Department
         </Button>
       </div>
+
+      <AlertDialog open={pendingDeleteId !== null} onOpenChange={(open) => { if (!open) { setPendingDeleteId(null); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Department</AlertDialogTitle>
+            <AlertDialogDescription>This action permanently deletes the department and cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={blockedDeleteMessage !== null} onOpenChange={(open) => !open && setBlockedDeleteMessage(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cannot Delete Department</AlertDialogTitle>
+            <AlertDialogDescription>{blockedDeleteMessage}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setBlockedDeleteMessage(null)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
@@ -183,11 +218,9 @@ export default function Departments() {
                       </TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(department)}><Edit2 className="h-4 w-4" /></Button>
-                        {department.isActive && (
-                          <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(department.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <Button variant="outline" size="sm" className="border-red-200 text-red-700 hover:bg-red-50" onClick={() => setPendingDeleteId(department.id)}>
+                          <Trash2 className="mr-2 h-4 w-4" /> Delete
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and, sql } from "drizzle-orm";
-import { db, storesTable } from "@workspace/db";
+import { db, storesTable, inventoryItemsTable } from "@workspace/db";
 import { requireAuth } from "../lib/auth";
 import { createAuditLog } from "../lib/audit";
 
@@ -84,13 +84,19 @@ router.patch("/stores/:id", requireAuth, async (req, res): Promise<void> => {
 
 router.delete("/stores/:id", requireAuth, async (req, res): Promise<void> => {
   const id = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id, 10);
-  const [store] = await db.update(storesTable).set({ isActive: false }).where(eq(storesTable.id, id)).returning();
+  const [referencedItem] = await db.select({ id: inventoryItemsTable.id }).from(inventoryItemsTable).where(eq(inventoryItemsTable.storeId, id)).limit(1);
+  if (referencedItem) {
+    res.status(409).json({ error: "Cannot delete because this record is currently in use." });
+    return;
+  }
+
+  const [store] = await db.delete(storesTable).where(eq(storesTable.id, id)).returning();
   if (!store) {
     res.status(404).json({ error: "Store not found" });
     return;
   }
   await createAuditLog(req.user!, "DELETE", "stores", id);
-  res.json({ message: "Store deactivated" });
+  res.json({ message: "Store deleted" });
 });
 
 export default router;

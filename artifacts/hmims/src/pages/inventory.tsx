@@ -1,17 +1,36 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
-import { useListInventoryItems } from "@workspace/api-client-react";
+import { useLocation } from "wouter";
+import { useDeleteInventoryItem, useListInventoryItems } from "@workspace/api-client-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Search, Eye, Filter } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Plus, Search, Eye, Pencil, Trash2, Filter } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function InventoryList() {
   const [search, setSearch] = useState("");
-  const { data: items, isLoading } = useListInventoryItems({ search });
+  const { data: items, isLoading, refetch } = useListInventoryItems({ search });
+  const deleteMutation = useDeleteInventoryItem();
+  const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+
+  const handleDelete = () => {
+    if (pendingDeleteId === null) return;
+    deleteMutation.mutate({ id: pendingDeleteId }, {
+      onSuccess: () => {
+        toast({ title: "Inventory item deleted" });
+        setPendingDeleteId(null);
+        refetch();
+      },
+      onError: (error) => {
+        toast({ title: "Unable to delete inventory item", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+      },
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -24,6 +43,22 @@ export default function InventoryList() {
           <Plus className="h-4 w-4" /> Add Item
         </Button>
       </div>
+
+      <AlertDialog open={pendingDeleteId !== null} onOpenChange={(open) => !open && setPendingDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Inventory Item</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this inventory item?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleteMutation.isPending}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Card className="shadow-sm border-border/50">
         <CardContent className="p-0">
@@ -48,10 +83,10 @@ export default function InventoryList() {
                 <TableRow>
                   <TableHead className="w-[120px]">Item Code</TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead className="text-right">Price (KES)</TableHead>
-                  <TableHead>Location</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead className="text-right">Qty Available</TableHead>
+                  <TableHead className="text-right">Cost (KES)</TableHead>
+                  <TableHead>Store</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -67,13 +102,13 @@ export default function InventoryList() {
                   </TableRow>
                 ) : (
                   items?.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => setLocation(`/inventory/${item.id}`)}>
+                    <TableRow key={item.id} className="hover:bg-muted/30 transition-colors">
                       <TableCell className="font-mono text-xs">{item.itemCode}</TableCell>
                       <TableCell className="font-medium text-gray-900">{item.itemName}</TableCell>
-                      <TableCell>{item.categoryName}</TableCell>
-                      <TableCell className="text-right font-medium">{item.currentQuantity} {item.unitOfMeasure}</TableCell>
-                      <TableCell className="text-right">{item.purchasePrice.toLocaleString()}</TableCell>
-                      <TableCell>{item.shelfBinLocation || "-"}</TableCell>
+                      <TableCell>{item.departmentName || item.categoryName || "-"}</TableCell>
+                      <TableCell className="text-right font-medium">{item.quantityAvailable ?? item.currentQuantity} {item.unitOfMeasure}</TableCell>
+                      <TableCell className="text-right">{(item.purchaseCost ?? item.purchasePrice ?? 0).toLocaleString()}</TableCell>
+                      <TableCell>{item.storeName || item.shelfBinLocation || "-"}</TableCell>
                       <TableCell>
                         <Badge variant={
                           item.status === "available" ? "default" :
@@ -86,8 +121,14 @@ export default function InventoryList() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setLocation(`/inventory/${item.id}`); }}>
+                        <Button variant="ghost" size="icon" onClick={(event) => { event.stopPropagation(); setLocation(`/inventory/${item.id}`); }}>
                           <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={(event) => { event.stopPropagation(); setLocation(`/inventory/${item.id}`); }}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={(event) => { event.stopPropagation(); setPendingDeleteId(item.id); }}>
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
